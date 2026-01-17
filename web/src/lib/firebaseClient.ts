@@ -3,8 +3,10 @@ import { getAuth, type Auth } from "firebase/auth";
 import { getFunctions, type Functions } from "firebase/functions";
 import { getFirestore, type Firestore } from "firebase/firestore";
 
-// Les konfig fra Next.js sine public env-variabler (defineres i .env.local).
+// Les konfig fra Next.js sine public env-variabler (defineres i web/.env.local).
 // Merk: disse verdiene blir bundet ved build-tid i Next.js.
+// TODO (manuelt steg): sett samme NEXT_PUBLIC_FIREBASE_* i både web/.env.local
+// og som Environment Variables i Vercel-prosjektet for web-appen.
 const firebaseConfig = {
 	apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
 	authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,

@@ -21,6 +21,10 @@ function randomKey(bytes = 32) {
 }
 
 // AES-256-GCM encryption so admin can SEE pin without storing plaintext.
+// TODO (manuelt steg via Firebase CLI, ikke i kode):
+//   Kjør én gang per miljø:
+//     firebase functions:config:set app.aes_key="<base64-encoded 32-byte key>"
+//   og deretter redeploy functions. app.aes_key må dekode til akkurat 32 bytes.
 function getAesKey(): Buffer {
   const keyB64 = functions.config().app?.aes_key;
   if (!keyB64) throw new Error("Missing functions config: app.aes_key (base64 32 bytes).");
