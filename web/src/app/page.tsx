@@ -175,14 +175,14 @@ export default function HomePage() {
 		}
 	}
 
-	return (
-		<main className="min-h-screen bg-zinc-50 p-6">
+		return (
+			<main className="min-h-screen bg-zinc-50 p-6 text-zinc-900">
 			<div className="mx-auto flex max-w-4xl flex-col gap-8">
 				<header className="space-y-2">
 					<h1 className="text-2xl font-semibold">Airliftas – PIN-innlogging</h1>
-						<p className="text-base text-zinc-800">
-						Registrer deg som bruker, sett PIN når du er godkjent, og logg inn med
-							PIN. Admin-grensesnittet finner du på <code>/admin</code>.
+							<p className="text-base font-normal leading-relaxed text-zinc-900">
+								Registrer deg som bruker, sett PIN når du er godkjent, og logg inn med
+									PIN. Admin-grensesnittet finner du på <code>/admin</code>.
 					</p>
 				</header>
 
@@ -192,13 +192,13 @@ export default function HomePage() {
 					</div>
 				)}
 
-				<section className="grid gap-6 md:grid-cols-2">
+					<section className="grid gap-6 md:grid-cols-2">
 					{/* Ny registreringsforespørsel */}
 					<div className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4">
 						<h2 className="text-lg font-medium">1. Registrer deg</h2>
-							<p className="text-sm text-zinc-800">
-							Fyll inn navn og telefon. En admin godkjenner deg, og deretter kan du
-								sette PIN.
+								<p className="text-sm leading-relaxed text-zinc-900">
+									Fyll inn navn og telefon. En admin godkjenner deg, og deretter kan du
+										sette PIN.
 						</p>
 						<form className="space-y-3" onSubmit={handleCreateRequest}>
 							<div className="space-y-1">
@@ -229,16 +229,16 @@ export default function HomePage() {
 						</form>
 					</div>
 
-					{/* Status + sett PIN */}
+						{/* Status + sett PIN */}
 					<div className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4">
 						<h2 className="text-lg font-medium">2. Status &amp; PIN</h2>
-							<p className="text-sm text-zinc-800">
-							Vi bruker en hemmelig requestKey lagret i nettleseren din for å
-								finne forespørselen din.
+								<p className="text-sm leading-relaxed text-zinc-900">
+									Vi bruker en hemmelig requestKey lagret i nettleseren din for å
+										finne forespørselen din.
 						</p>
 
-							<div className="flex items-center gap-2 text-sm text-zinc-800">
-							<span className="font-mono">
+								<div className="flex items-center gap-2 text-sm font-medium text-zinc-900">
+								<span className="font-mono">
 								{requestKey ? "RequestKey er lagret" : "Ingen requestKey lagret"}
 							</span>
 							<button
@@ -296,11 +296,11 @@ export default function HomePage() {
 					</div>
 				</section>
 
-				<section className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4 md:max-w-md">
+					<section className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4 md:max-w-md">
 					<h2 className="text-lg font-medium">3. Logg inn med PIN</h2>
-						<p className="text-sm text-zinc-800">
-						Når du har fått PIN, kan du logge inn her. Admin-grensesnittet krever at
-							brukeren din har rollen <code>admin</code> i Firestore.
+							<p className="text-sm leading-relaxed text-zinc-900">
+								Når du har fått PIN, kan du logge inn her. Admin-grensesnittet krever at
+									brukeren din har rollen <code>admin</code> i Firestore.
 					</p>
 					<form className="flex items-end gap-3" onSubmit={handleLogin}>
 						<div className="space-y-1">
