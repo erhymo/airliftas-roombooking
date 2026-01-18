@@ -1,7 +1,7 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
 import { getFunctions, type Functions } from "firebase/functions";
-import { getFirestore, type Firestore } from "firebase/firestore";
+import { getFirestore, type Firestore, enableIndexedDbPersistence } from "firebase/firestore";
 
 // Les konfig fra Next.js sine public env-variabler (defineres i web/.env.local).
 // Merk: disse verdiene blir bundet ved build-tid i Next.js.
@@ -43,9 +43,23 @@ export function firebaseAuth(): Auth {
 }
 
 let _db: Firestore | null = null;
+let _dbPersistenceInit: Promise<void> | null = null;
+
 export function getFirebaseDb(): Firestore {
 	if (_db) return _db;
-	_db = getFirestore(getFirebaseApp());
+
+	const app = getFirebaseApp();
+	_db = getFirestore(app);
+
+	// Aktiver offline persistence i nettleseren der det er stttet.
+	// Hvis det feiler (f.eks. flere faner eller manglende IndexedDB-st8tte),
+	// logger vi bare en advarsel og lar appen fortsette uten offline cache.
+	if (typeof window !== "undefined" && !_dbPersistenceInit) {
+		_dbPersistenceInit = enableIndexedDbPersistence(_db).catch((err) => {
+			console.warn("Kunne ikke aktivere Firestore offline persistence (fortsetter uten)", err);
+		});
+	}
+
 	return _db;
 }
 

@@ -7,6 +7,8 @@ import { onAuthStateChanged } from "firebase/auth";
 import { firebaseAuth } from "@/lib/firebaseClient";
 import { isSessionExpired } from "@/lib/session";
 import BergenBase from "@/app/base/[baseId]/BergenBase";
+import BringelandBase from "@/app/base/[baseId]/BringelandBase";
+import KinsarvikBase from "@/app/base/[baseId]/KinsarvikBase";
 
 export default function BasePage() {
 	const router = useRouter();
@@ -52,8 +54,8 @@ export default function BasePage() {
 		);
 	}
 
-	// Bergen MVP (Etappe 4)
-	if (baseId === "bergen") {
+		// Bergen / Bringeland / Kinsarvik base-sider
+		if (baseId === "bergen") {
 		return (
 			<main className="min-h-screen p-6">
 				<div className="max-w-3xl mx-auto">
@@ -62,6 +64,26 @@ export default function BasePage() {
 			</main>
 		);
 	}
+
+		if (baseId === "bringeland") {
+			return (
+				<main className="min-h-screen p-6">
+					<div className="max-w-3xl mx-auto">
+						<BringelandBase />
+					</div>
+				</main>
+			);
+		}
+
+		if (baseId === "kinsarvik") {
+			return (
+				<main className="min-h-screen p-6">
+					<div className="max-w-3xl mx-auto">
+						<KinsarvikBase />
+					</div>
+				</main>
+			);
+		}
 
 	const title =
 		baseId === "bringeland"
