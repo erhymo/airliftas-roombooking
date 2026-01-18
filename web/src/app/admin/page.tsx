@@ -162,12 +162,12 @@ export default function AdminPage() {
 		setRefreshingPending(true);
 		setMsg(null);
 			try {
-			const q = query(
-				collection(db, "userRequests"),
-				where("status", "==", "pending"),
-				orderBy("createdAt", "desc"),
-			);
-			const snap = await getDocs(q);
+				// Kun filter på status for å unngå behov for egen Firestore-indeks.
+				const q = query(
+					collection(db, "userRequests"),
+					where("status", "==", "pending"),
+				);
+				const snap = await getDocs(q);
 
 				const rows: PendingRequest[] = snap.docs.map((d) => {
 					const data = d.data() as PendingRequestDoc;
