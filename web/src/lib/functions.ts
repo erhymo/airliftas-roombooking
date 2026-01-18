@@ -22,13 +22,13 @@ export type AdminUserWithPin = {
 	pin: string | null;
 };
 
-export async function fnCreateUserRequest(name: string, phone: string) {
+export async function fnCreateUserRequest(name: string, phone: string, pin: string) {
 	const f = getFirebaseFunctions();
-	const call = httpsCallable<{ name: string; phone: string }, { requestId: string; requestKey: string }>(
-		f,
-		"createUserRequest",
-	);
-	const res = await call({ name, phone });
+	const call = httpsCallable<
+		{ name: string; phone: string; pin: string },
+		{ requestId: string; requestKey: string }
+	>(f, "createUserRequest");
+	const res = await call({ name, phone, pin });
 	return res.data;
 }
 

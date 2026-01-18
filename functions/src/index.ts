@@ -70,30 +70,50 @@ async function requireAdmin(uid: string) {
 }
 
 /**
- * 1) Ny bruker: createUserRequest(name, phone) -> returns requestId + requestKey
- * - requestKey lagres av klient i localStorage
- * - vi lagrer kun hash(requestKey) i Firestore
+ * 1) Ny bruker: createUserRequest(name, phone, pin)
+ * - Bruker registrerer seg med ønsket PIN direkte.
+ * - Vi sjekker at PIN ser ok ut og ikke allerede er i bruk (pinIndex/{pin}).
+ * - Vi lagrer kun en kryptert versjon av PIN i userRequests (pinEnc).
+ * - requestKey returneres fortsatt for bakoverkompabilitet, men brukes ikke i ny flyt.
  */
 export const createUserRequest = functions.https.onCall(async (data) => {
-  const name = String(data?.name || "").trim();
-  const phone = String(data?.phone || "").trim();
+	const name = String(data?.name || "").trim();
+	const phone = String(data?.phone || "").trim();
+	const pin = String(data?.pin || "").trim();
 
-  if (name.length < 2 || phone.length < 5) {
-    throw new functions.https.HttpsError("invalid-argument", "Ugyldig navn/telefon.");
-  }
+	if (name.length < 2 || phone.length < 5) {
+		throw new functions.https.HttpsError("invalid-argument", "Ugyldig navn/telefon.");
+	}
 
-  const requestKey = randomKey(32);
-  const requestKeyHash = sha256(requestKey);
+	// PIN må være 4 siffer, men vi sier ikke noe om hvorfor den evt. feiler utover
+	// en generisk melding når den kolliderer med eksisterende PIN.
+	if (!isValidPin(pin)) {
+		throw new functions.https.HttpsError("invalid-argument", "PIN må være 4 siffer.");
+	}
 
-  const ref = await db.collection("userRequests").add({
-    name,
-    phone,
-    status: "pending",
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    requestKeyHash,
-  });
+	// Sjekk om PIN allerede er i bruk for en aktiv bruker (pinIndex/{pin}).
+	// Viktig: her reserverer vi IKKE PIN-en, vi sjekker bare mot eksisterende brukere.
+	const pinIndexSnap = await db.doc(`pinIndex/${pin}`).get();
+	if (pinIndexSnap.exists) {
+		// Samme generiske melding som ellers i PIN-flyten.
+		throw new functions.https.HttpsError("permission-denied", GENERIC_PIN_ERROR);
+	}
 
-  return { requestId: ref.id, requestKey };
+	const pinEnc = encryptPin(pin);
+
+	const requestKey = randomKey(32);
+	const requestKeyHash = sha256(requestKey);
+
+	const ref = await db.collection("userRequests").add({
+		name,
+		phone,
+		status: "pending",
+		createdAt: admin.firestore.FieldValue.serverTimestamp(),
+		requestKeyHash,
+		pinEnc,
+	});
+
+	return { requestId: ref.id, requestKey };
 });
 
 /**
@@ -139,54 +159,130 @@ export const checkRequestStatus = functions.https.onCall(async (data) => {
 /**
  * 3) Admin: approveUser(requestId)
  * - oppretter Auth user + users/{uid}
- * - markerer request approved + binder uid
+ * - setter PIN hvis brukeren har valgt PIN ved registrering (ny flyt)
+ * - markerer request som approved/completed og binder uid
  */
 export const approveUser = functions.https.onCall(async (data, context) => {
-  const adminUid = requireAuth(context);
-  const adminUser = await requireAdmin(adminUid);
+	const adminUid = requireAuth(context);
+	const adminUser = await requireAdmin(adminUid);
 
-  const requestId = String(data?.requestId || "").trim();
-  if (!requestId) throw new functions.https.HttpsError("invalid-argument", "Mangler requestId.");
+	const requestId = String(data?.requestId || "").trim();
+	if (!requestId) throw new functions.https.HttpsError("invalid-argument", "Mangler requestId.");
 
-  const reqRef = db.doc(`userRequests/${requestId}`);
-  const reqSnap = await reqRef.get();
-  if (!reqSnap.exists) throw new functions.https.HttpsError("not-found", "Request finnes ikke.");
+	const reqRef = db.doc(`userRequests/${requestId}`);
+	const reqSnap = await reqRef.get();
+	if (!reqSnap.exists) throw new functions.https.HttpsError("not-found", "Request finnes ikke.");
 
-  const req = reqSnap.data() as any;
-  if (req.status !== "pending") {
-    throw new functions.https.HttpsError("failed-precondition", "Allerede behandlet.");
-  }
+	const req = reqSnap.data() as any;
+	if (req.status !== "pending") {
+		throw new functions.https.HttpsError("failed-precondition", "Allerede behandlet.");
+	}
 
-  // create auth user
-  const authUser = await admin.auth().createUser({
-    displayName: req.name,
-  });
+	const name: string = (req.name as string | undefined) ?? "";
+	const phone: string = (req.phone as string | undefined) ?? "";
 
-  // create users doc
-  await db.doc(`users/${authUser.uid}`).set({
-    name: req.name,
-    phone: req.phone,
-    role: "user",
-    status: "active",
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-  });
+	// create auth user først (uten PIN). Denne kan i teorien bli "foreldreløs" hvis
+	// transaksjonen under feiler, men brukeren får da uansett ikke logge inn før
+	// admin har fikset PIN via adminpanelet.
+	const authUser = await admin.auth().createUser({
+		displayName: name,
+	});
+	const uid = authUser.uid;
 
-  await reqRef.update({
-    status: "approved",
-    uid: authUser.uid,
-    approvedAt: admin.firestore.FieldValue.serverTimestamp(),
-    approvedBy: adminUid,
-  });
+	// Nyere requests har pinEnc (kryptert PIN) lagret i dokumentet.
+	const pinEncFromRequest = (req as any).pinEnc as string | undefined;
+	let pinFromRequest: string | null = null;
+	if (pinEncFromRequest) {
+		try {
+			const raw = decryptPin(pinEncFromRequest);
+			if (!isValidPin(raw)) {
+				throw new Error("Invalid PIN-format on request");
+			}
+			pinFromRequest = raw;
+		} catch {
+			// Beholder generisk PIN-feilmelding for ikke å lekke detaljer.
+			throw new functions.https.HttpsError("permission-denied", GENERIC_PIN_ERROR);
+		}
+	}
 
-  await db.collection("activity").add({
-    type: "APPROVE_USER",
-    at: admin.firestore.FieldValue.serverTimestamp(),
-    actorUid: adminUid,
-    actorNameSnapshot: adminUser.name,
-    summary: `Admin godkjente ${req.name}`,
-  });
+	const userRef = db.doc(`users/${uid}`);
+	const pinIndexRef = pinFromRequest ? db.doc(`pinIndex/${pinFromRequest}`) : null;
+	const userPinsRef = pinFromRequest ? db.doc(`userPins/${uid}`) : null;
 
-  return { ok: true };
+	await db.runTransaction(async (tx) => {
+		// Re-les request inne i transaksjonen for å sikre at den fortsatt er pending.
+		const freshReqSnap = await tx.get(reqRef);
+		if (!freshReqSnap.exists) {
+			throw new functions.https.HttpsError("not-found", "Request finnes ikke.");
+		}
+		const freshReq = freshReqSnap.data() as any;
+		if (freshReq.status !== "pending") {
+			throw new functions.https.HttpsError("failed-precondition", "Allerede behandlet.");
+		}
+
+		// Opprett users/{uid}
+		tx.set(userRef, {
+			name,
+			phone,
+			role: "user",
+			status: "active",
+			createdAt: admin.firestore.FieldValue.serverTimestamp(),
+		});
+
+		// Hvis vi har en PIN fra requesten (ny flyt): sett pinIndex + userPins.
+		if (pinFromRequest && pinIndexRef && userPinsRef) {
+			const existingPinIndexSnap = await tx.get(pinIndexRef);
+			if (existingPinIndexSnap.exists) {
+				// Samme generiske melding som ellers ved PIN-kollisjon.
+				throw new functions.https.HttpsError("permission-denied", GENERIC_PIN_ERROR);
+			}
+
+			const pinHash = await bcrypt.hash(pinFromRequest, 10);
+			const pinEnc = encryptPin(pinFromRequest);
+
+			tx.set(pinIndexRef, {
+				uid,
+				active: true,
+				updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+			});
+
+			tx.set(userPinsRef, {
+				pinHash,
+				pinEnc,
+				pinLast4: pinFromRequest,
+				updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+			});
+
+			tx.update(reqRef, {
+				status: "completed",
+				uid,
+				approvedAt: admin.firestore.FieldValue.serverTimestamp(),
+				approvedBy: adminUid,
+				pinSetAt: admin.firestore.FieldValue.serverTimestamp(),
+			});
+		} else {
+			// Gammelt format uten PIN i request: godkjenn uten å sette PIN.
+			tx.update(reqRef, {
+				status: "approved",
+				uid,
+				approvedAt: admin.firestore.FieldValue.serverTimestamp(),
+				approvedBy: adminUid,
+			});
+		}
+
+		// Logg aktivitet for godkjenning (med eller uten PIN).
+		tx.set(db.collection("activity").doc(), {
+			type: "APPROVE_USER",
+			at: admin.firestore.FieldValue.serverTimestamp(),
+			actorUid: adminUid,
+			actorNameSnapshot: adminUser.name,
+			summary: pinFromRequest
+				? `Admin godkjente ${name} og aktiverte PIN`
+				: `Admin godkjente ${name}`,
+		});
+	});
+
+	return { ok: true };
 });
 
 /**
