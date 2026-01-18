@@ -21,13 +21,15 @@ import {
 import { firebaseAuth, firebaseDb } from "@/lib/firebaseClient";
 import { markSessionStart } from "@/lib/session";
 import {
-	fnApproveUser,
-	fnAdminChangePin,
-		fnAdminListUsersWithPins,
-		type AdminUserWithPin,
-} from "@/lib/functions";
+		fnApproveUser,
+		fnAdminChangePin,
+			fnAdminListUsersWithPins,
+			type AdminUserWithPin,
+	} from "@/lib/functions";
 
-type PendingRequest = {
+const HARD_CODED_ADMIN_EMAIL = "oyvind.myhre@airlift.no";
+
+	type PendingRequest = {
 	id: string;
 	name: string;
 	phone: string;
@@ -93,40 +95,48 @@ export default function AdminPage() {
 		// Sørg for at minst én bruker har et dokument users/{uid} med
 		//   { role: "admin", status: "active" }
 		// ellers vil ingen komme forbi denne sjekken.
-		useEffect(() => {
-		const unsub = onAuthStateChanged(auth, async (u) => {
-			setAuthUid(u?.uid ?? null);
+			useEffect(() => {
+				const unsub = onAuthStateChanged(auth, async (u) => {
+					setAuthUid(u?.uid ?? null);
 
-			if (!u?.uid) {
-				setIsAdmin(false);
-				setLoading(false);
-				return;
-			}
+					if (!u?.uid) {
+						setIsAdmin(false);
+						setLoading(false);
+						return;
+					}
 
-			// Check role by reading users/{uid} directly
-				try {
-					const meSnap = await getDocs(
-						query(collection(db, "users"), where("__name__", "==", u.uid)),
-					);
+					// Hardkodet admin: e-post gir umiddelbart admin-tilgang.
+					if (u.email === HARD_CODED_ADMIN_EMAIL) {
+						setIsAdmin(true);
+						setLoading(false);
+						await refreshAll();
+						return;
+					}
 
-					const me = meSnap.docs[0]?.data() as UserDoc | undefined;
-				const ok = me?.status === "active" && me?.role === "admin";
-				setIsAdmin(!!ok);
+					// Ellers: sjekk rolle i users/{uid}.
+					try {
+						const meSnap = await getDocs(
+							query(collection(db, "users"), where("__name__", "==", u.uid)),
+						);
 
-				setLoading(false);
+						const me = meSnap.docs[0]?.data() as UserDoc | undefined;
+						const ok = me?.status === "active" && me?.role === "admin";
+						setIsAdmin(!!ok);
 
-				if (ok) {
-					await refreshAll();
-				}
-			} catch {
-				setIsAdmin(false);
-				setLoading(false);
-			}
-		});
+						setLoading(false);
 
-			return () => unsub();
-			// eslint-disable-next-line react-hooks/exhaustive-deps
-		}, []);
+						if (ok) {
+							await refreshAll();
+						}
+					} catch {
+						setIsAdmin(false);
+						setLoading(false);
+					}
+				});
+
+				return () => unsub();
+				// eslint-disable-next-line react-hooks/exhaustive-deps
+			}, []);
 
 			// --------------- forsøk å bootstrap admin via backend hvis e-post er hardkodet admin ---------------
 			useEffect(() => {
