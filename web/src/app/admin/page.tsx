@@ -251,14 +251,14 @@ export default function AdminPage() {
 			);
 		}
 	
-		if (!authUid && !localAdmin) {
-			return (
-				<main className="min-h-screen p-6">
-					<div className="max-w-md mx-auto space-y-4">
-						<h1 className="text-2xl font-semibold">Admin</h1>
-						<p className="text-sm text-zinc-800">
-							Logg inn som admin med brukernavn og passord.
-						</p>
+			if (!authUid && !localAdmin) {
+				return (
+					<main className="min-h-screen p-6 text-zinc-900">
+						<div className="max-w-md mx-auto space-y-4">
+							<h1 className="text-2xl font-semibold">Admin</h1>
+							<p className="text-sm leading-relaxed">
+								Logg inn som admin med brukernavn og passord.
+							</p>
 
 						{adminLoginError && (
 							<div className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800">
@@ -293,7 +293,7 @@ export default function AdminPage() {
 							</button>
 						</form>
 
-						<p className="text-xs text-zinc-500">
+							<p className="text-xs text-zinc-900">
 							Alternativt kan du logge inn med PIN via forsiden.
 						</p>
 					</div>
@@ -303,7 +303,7 @@ export default function AdminPage() {
 	
 		if (!EFFECTIVE_ADMIN) {
 		return (
-			<main className="min-h-screen p-6">
+			<main className="min-h-screen p-6 text-zinc-900">
 				<div className="max-w-2xl mx-auto space-y-3">
 					<h1 className="text-2xl font-semibold">Admin</h1>
 					<p>Du har ikke admin-tilgang.</p>
@@ -332,7 +332,7 @@ export default function AdminPage() {
 					<header className="flex items-center justify-between gap-4">
 						<div>
 							<h1 className="text-2xl font-semibold">Adminpanel</h1>
-							<p className="text-sm text-zinc-800">
+							<p className="text-sm leading-relaxed">
 								Godkjenn brukere, se/endre pinkoder
 							</p>
 						</div>

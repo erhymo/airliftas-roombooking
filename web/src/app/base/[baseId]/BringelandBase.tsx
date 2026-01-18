@@ -358,33 +358,29 @@ export default function BringelandBase() {
 		}
 	}
 
-	const planRoom = (roomId: RoomId) => {
-		const current = roomCurrentBooking(roomId);
-		const next = roomNextBooking(roomId);
-
-		return (
-			<div className="text-[11px] leading-tight">
-				{current ? (
-					<>
-						<div className="font-semibold">{current.name}</div>
-						<div className="opacity-80">
-							{fmt(current.from)} – {fmt(current.to)}
-						</div>
-					</>
-				) : next ? (
-					<>
-						<div className="font-semibold opacity-80">Ledig</div>
-						<div className="opacity-70">Neste: {next.name}</div>
-						<div className="opacity-70">
-							{fmt(next.from)} – {fmt(next.to)}
-						</div>
-					</>
-				) : (
-					<div className="opacity-80">Ledig</div>
-				)}
-			</div>
-		);
-	};
+		const planRoom = (roomId: RoomId) => {
+			const current = roomCurrentBooking(roomId);
+			const next = roomNextBooking(roomId);
+		
+			return (
+				<div className="text-[11px] leading-tight text-zinc-900">
+					{current ? (
+						<>
+							<div className="font-semibold">{current.name}</div>
+							<div>{fmt(current.from)} – {fmt(current.to)}</div>
+						</>
+					) : next ? (
+						<>
+							<div className="font-semibold">Ledig</div>
+							<div>Neste: {next.name}</div>
+							<div>{fmt(next.from)} – {fmt(next.to)}</div>
+						</>
+					) : (
+						<div>Ledig</div>
+					)}
+				</div>
+			);
+		};
 
 	function getRoomOverview(roomId: RoomId) {
 		return roomStatus(roomId);
@@ -401,7 +397,7 @@ export default function BringelandBase() {
 				<header className="flex items-start justify-between gap-4">
 					<div>
 						<h1 className="text-2xl font-semibold">Bringeland</h1>
-						<p className="text-sm opacity-70">
+						<p className="text-sm leading-relaxed text-zinc-900">
 							Brakke: 12 rom over 2 etasjer. Booking: dato → tid (default 18:00–18:00).
 						</p>
 					</div>
@@ -548,10 +544,10 @@ export default function BringelandBase() {
 						</svg>
 					</div>
 
-					<div className="text-xs opacity-70">
+					<div className="text-xs text-zinc-900">
 						Farger: Rød=opptatt nå, Gul=opptatt innen 12 timer, Grønn=ledig.
 					</div>
-					<div className="text-xs opacity-70">
+					<div className="text-xs text-zinc-900">
 						Tips: klikk et rom for å booke. Klikk en booking i listen under for å
 						redigere (kun egne).
 					</div>
@@ -598,20 +594,20 @@ export default function BringelandBase() {
 											{statusLabel}
 										</span>
 										{current && (
-											<div className="text-xs sm:text-sm">
-												<span className="opacity-70">Nå: </span>
+								<div className="text-xs sm:text-sm text-zinc-900">
+									<span>Nå: </span>
 												<span className="font-medium">{current.name}</span>
-												<span className="opacity-70">
+									<span>
 													{" "}
 													{fmt(current.from)} – {fmt(current.to)}
 												</span>
 											</div>
 										)}
 										{!current && next && (
-											<div className="text-xs sm:text-sm">
-												<span className="opacity-70">Neste: </span>
+								<div className="text-xs sm:text-sm text-zinc-900">
+									<span>Neste: </span>
 												<span className="font-medium">{next.name}</span>
-												<span className="opacity-70">
+									<span>
 													{" "}
 													{fmt(next.from)} – {fmt(next.to)}
 												</span>
@@ -627,9 +623,9 @@ export default function BringelandBase() {
 				<section className="rounded-2xl border p-4 space-y-3">
 					<div className="font-semibold">Bookinger</div>
 
-					{bookings.length === 0 ? (
-						<div className="text-sm opacity-70">Ingen bookinger funnet.</div>
-					) : (
+						{bookings.length === 0 ? (
+							<div className="text-sm text-zinc-900">Ingen bookinger funnet.</div>
+						) : (
 						<div className="space-y-2">
 							{bookings
 									.slice()
@@ -641,21 +637,21 @@ export default function BringelandBase() {
 												key={b.id}
 												onClick={mine ? () => openEdit(b) : undefined}
 												disabled={!mine}
-												className={`w-full text-left rounded-xl border p-3 ${
-													mine ? "hover:bg-black/5" : "opacity-70 cursor-not-allowed"
-												}`}
+									className={`w-full text-left rounded-xl border p-3 ${
+										mine ? "hover:bg-black/5" : "cursor-not-allowed"
+									}`}
 											>
 												<div className="flex items-center justify-between gap-2">
 													<div className="font-medium">
 														{b.roomName} – {b.name}
 													</div>
-													<div className="text-xs opacity-70">
-														{mine ? "Din" : "Annen"}
-													</div>
-												</div>
-												<div className="text-sm opacity-70">
-													{fmt(b.from)} – {fmt(b.to)}
-												</div>
+								<div className="text-xs text-zinc-900">
+									{mine ? "Din" : "Annen"}
+								</div>
+							</div>
+							<div className="text-sm text-zinc-900">
+								{fmt(b.from)} – {fmt(b.to)}
+							</div>
 											</button>
 										);
 									})}
@@ -672,7 +668,7 @@ export default function BringelandBase() {
 									<div className="text-lg font-semibold">
 										{ROOMS.find((r) => r.id === openRoom)?.label}
 									</div>
-									<div className="text-sm opacity-70">
+								<div className="text-sm text-zinc-900">
 										{editBookingId
 												? "Rediger booking (kun egne)"
 												: "Ny booking"}
@@ -686,10 +682,10 @@ export default function BringelandBase() {
 								</button>
 							</div>
 
-							<div className="rounded-xl border p-3 text-sm opacity-80">
-								Bringeland: default er 18:00 → 18:00. Du velger først dato, så tid i
-								neste steg.
-							</div>
+						<div className="rounded-xl border p-3 text-sm leading-relaxed text-zinc-900">
+							Bringeland: default er 18:00 → 18:00. Du velger først dato, så tid i
+							neste steg.
+						</div>
 							
 							{step === "date" ? (
 								<div className="space-y-3">

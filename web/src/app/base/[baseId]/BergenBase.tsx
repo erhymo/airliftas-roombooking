@@ -461,24 +461,20 @@ export default function BergenBase() {
 		const next = roomNextBooking(roomId);
 
 		return (
-			<div className="text-[11px] leading-tight">
+			<div className="text-[11px] leading-tight text-zinc-900">
 				{current ? (
 					<>
 						<div className="font-semibold">{current.name}</div>
-						<div className="opacity-80">
-							{fmt(current.from)} – {fmt(current.to)}
-						</div>
+						<div>{fmt(current.from)} – {fmt(current.to)}</div>
 					</>
 				) : next ? (
 					<>
-						<div className="font-semibold opacity-80">Ledig</div>
-						<div className="opacity-70">Neste: {next.name}</div>
-						<div className="opacity-70">
-							{fmt(next.from)} – {fmt(next.to)}
-						</div>
+						<div className="font-semibold">Ledig</div>
+						<div>Neste: {next.name}</div>
+						<div>{fmt(next.from)} – {fmt(next.to)}</div>
 					</>
 				) : (
-					<div className="opacity-80">Ledig</div>
+					<div>Ledig</div>
 				)}
 			</div>
 		);
@@ -494,7 +490,7 @@ export default function BergenBase() {
 					<header className="flex items-start justify-between gap-4">
 						<div>
 							<h1 className="text-2xl font-semibold">Bergen</h1>
-							<p className="text-sm opacity-70">
+							<p className="text-sm leading-relaxed text-zinc-900">
 								Brakke: 6 rom (3 + gang + 3). Booking: dato → tid (default 14:00–14:00).
 							</p>
 						</div>
@@ -617,10 +613,10 @@ export default function BergenBase() {
 						</svg>
 					</div>
 					
-					<div className="text-xs opacity-70">
+					<div className="text-xs text-zinc-900">
 						Farger: Rød=opptatt nå, Gul=opptatt innen 12 timer, Grønn=ledig.
 					</div>
-					<div className="text-xs opacity-70">
+					<div className="text-xs text-zinc-900">
 						Tips: klikk et rom for å booke. Klikk en booking i listen under for å
 						redigere (kun egne).
 					</div>
@@ -666,26 +662,26 @@ export default function BergenBase() {
 										>
 											{statusLabel}
 										</span>
-										{current && (
-											<div className="text-xs sm:text-sm">
-												<span className="opacity-70">Nå: </span>
-												<span className="font-medium">{current.name}</span>
-												<span className="opacity-70">
-													{" "}
-													{fmt(current.from)} – {fmt(current.to)}
-												</span>
-											</div>
-										)}
-										{!current && next && (
-											<div className="text-xs sm:text-sm">
-												<span className="opacity-70">Neste: </span>
-												<span className="font-medium">{next.name}</span>
-												<span className="opacity-70">
-													{" "}
-													{fmt(next.from)} – {fmt(next.to)}
-												</span>
-											</div>
-										)}
+							{current && (
+								<div className="text-xs sm:text-sm text-zinc-900">
+									<span>Nå: </span>
+									<span className="font-medium">{current.name}</span>
+									<span>
+										{" "}
+										{fmt(current.from)} – {fmt(current.to)}
+									</span>
+								</div>
+							)}
+							{!current && next && (
+								<div className="text-xs sm:text-sm text-zinc-900">
+									<span>Neste: </span>
+									<span className="font-medium">{next.name}</span>
+									<span>
+										{" "}
+										{fmt(next.from)} – {fmt(next.to)}
+									</span>
+								</div>
+							)}
 									</div>
 								</div>
 							);
@@ -696,9 +692,9 @@ export default function BergenBase() {
 				<section className="rounded-2xl border p-4 space-y-3">
 					<div className="font-semibold">Bookinger</div>
 
-					{bookings.length === 0 ? (
-						<div className="text-sm opacity-70">Ingen bookinger funnet.</div>
-					) : (
+						{bookings.length === 0 ? (
+							<div className="text-sm text-zinc-900">Ingen bookinger funnet.</div>
+						) : (
 						<div className="space-y-2">
 							{bookings
 									.slice()
@@ -713,13 +709,13 @@ export default function BergenBase() {
 												<div className="font-medium">
 													{b.roomName} – {b.name}
 												</div>
-												<div className="text-xs opacity-70">
-													{b.createdByUid === uid ? "Din" : "Annen"}
-												</div>
+								<div className="text-xs text-zinc-900">
+									{b.createdByUid === uid ? "Din" : "Annen"}
+								</div>
 											</div>
-											<div className="text-sm opacity-70">
-												{fmt(b.from)} – {fmt(b.to)}
-											</div>
+							<div className="text-sm text-zinc-900">
+								{fmt(b.from)} – {fmt(b.to)}
+							</div>
 										</button>
 									))}
 						</div>
@@ -737,12 +733,12 @@ export default function BergenBase() {
 						</button>
 					</div>
 
-					{hotel.length === 0 ? (
-						<div className="text-sm opacity-70">Ingen hotelloppføringer.</div>
-					) : (
+						{hotel.length === 0 ? (
+							<div className="text-sm text-zinc-900">Ingen hotelloppføringer.</div>
+						) : (
 						<div className="overflow-x-auto">
 							<table className="w-full text-sm">
-								<thead className="text-left opacity-70">
+							<thead className="text-left text-zinc-900">
 									<tr>
 										<th className="py-2">Navn</th>
 										<th className="py-2">Fra</th>
@@ -757,16 +753,16 @@ export default function BergenBase() {
 											<td className="py-2">{fmt(h.from)}</td>
 											<td className="py-2">{fmt(h.to)}</td>
 											<td className="py-2 text-right">
-												{h.createdByUid === uid ? (
-													<button
-														onClick={() => deleteHotelStay(h.id)}
-														className="rounded-lg border px-2 py-1 text-xs"
-													>
-														Slett
-													</button>
-												) : (
-													<span className="text-xs opacity-60">—</span>
-												)}
+									{h.createdByUid === uid ? (
+										<button
+											onClick={() => deleteHotelStay(h.id)}
+											className="rounded-lg border px-2 py-1 text-xs"
+										>
+											Slett
+										</button>
+									) : (
+										<span className="text-xs text-zinc-900">—</span>
+									)}
 											</td>
 										</tr>
 									))}
@@ -785,7 +781,7 @@ export default function BergenBase() {
 									<div className="text-lg font-semibold">
 										{ROOMS.find((r) => r.id === openRoom)?.label}
 									</div>
-									<div className="text-sm opacity-70">
+								<div className="text-sm text-zinc-900">
 										{editBookingId
 												? "Rediger booking (kun egne)"
 												: "Ny booking"}
@@ -799,7 +795,7 @@ export default function BergenBase() {
 								</button>
 							</div>
 
-							<div className="rounded-xl border p-3 text-sm opacity-80">
+							<div className="rounded-xl border p-3 text-sm leading-relaxed text-zinc-900">
 								Bergen: default er 14:00  14:00. Du velger først dato, så tid i neste
 								steg.
 							</div>
@@ -915,7 +911,7 @@ export default function BergenBase() {
 							<div className="flex items-start justify-between">
 								<div>
 									<div className="text-lg font-semibold">Legg til hotell</div>
-									<div className="text-sm opacity-70">Kun info til andre</div>
+								<div className="text-sm text-zinc-900">Kun info til andre</div>
 								</div>
 								<button
 									onClick={() => setHotelOpen(false)}
