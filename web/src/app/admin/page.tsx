@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import {
@@ -65,6 +65,11 @@ export default function AdminPage() {
 	const [loading, setLoading] = useState(true);
 	const [authUid, setAuthUid] = useState<string | null>(null);
 	const [isAdmin, setIsAdmin] = useState(false);
+	// Lokal, hardkodet admin-pålogging (kun klientside, ingen ekte sikkerhet)
+	const [localAdmin, setLocalAdmin] = useState(false);
+	const [adminLoginEmail, setAdminLoginEmail] = useState("");
+	const [adminLoginPassword, setAdminLoginPassword] = useState("");
+	const [adminLoginError, setAdminLoginError] = useState<string | null>(null);
 
 	const [msg, setMsg] = useState<string | null>(null);
 
@@ -114,9 +119,31 @@ export default function AdminPage() {
 			}
 		});
 
-		return () => unsub();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+			return () => unsub();
+			// eslint-disable-next-line react-hooks/exhaustive-deps
+		}, []);
+
+		const EFFECTIVE_ADMIN = isAdmin || localAdmin;
+
+		// --------------- lokal admin-innlogging (brukernavn/passord) ---------------
+		const HARD_CODED_EMAIL = "oyvind.myhre@airlift.no";
+		const HARD_CODED_PASSWORD = "Mayeren123";
+
+		function handleLocalAdminLogin(e: FormEvent) {
+			e.preventDefault();
+			setAdminLoginError(null);
+
+			if (
+				adminLoginEmail.trim() === HARD_CODED_EMAIL &&
+				adminLoginPassword === HARD_CODED_PASSWORD
+			) {
+				setLocalAdmin(true);
+				setAdminLoginPassword("");
+				return;
+			}
+
+			setAdminLoginError("Feil brukernavn eller passord.");
+		}
 
 	async function refreshAll() {
 		await Promise.all([loadPending(), loadUsersWithPins()]);
@@ -215,33 +242,66 @@ export default function AdminPage() {
 		router.push("/");
 	}
 
-	// --------------- UI ---------------
-	if (loading) {
-		return (
-			<main className="min-h-screen p-6">
-				<div className="max-w-5xl mx-auto">Laster…</div>
-			</main>
-		);
-	}
+		// --------------- UI ---------------
+		if (loading) {
+			return (
+				<main className="min-h-screen p-6">
+					<div className="max-w-5xl mx-auto">Laster…</div>
+				</main>
+			);
+		}
+	
+		if (!authUid && !localAdmin) {
+			return (
+				<main className="min-h-screen p-6">
+					<div className="max-w-md mx-auto space-y-4">
+						<h1 className="text-2xl font-semibold">Admin</h1>
+						<p className="text-sm text-zinc-800">
+							Logg inn som admin med brukernavn og passord.
+						</p>
 
-	if (!authUid) {
-		return (
-			<main className="min-h-screen p-6">
-				<div className="max-w-2xl mx-auto space-y-3">
-					<h1 className="text-2xl font-semibold">Admin</h1>
-					<p>Du må være innlogget for å se admin-siden.</p>
-					<button
-						onClick={() => router.push("/")}
-						className="rounded-xl border px-4 py-2"
-					>
-						Til forsiden
-					</button>
-				</div>
-			</main>
-		);
-	}
+						{adminLoginError && (
+							<div className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+								{adminLoginError}
+							</div>
+						)}
 
-	if (!isAdmin) {
+						<form className="space-y-3" onSubmit={handleLocalAdminLogin}>
+							<div className="space-y-1">
+								<label className="text-sm font-medium">Brukernavn (e-post)</label>
+								<input
+									type="email"
+									value={adminLoginEmail}
+									onChange={(e) => setAdminLoginEmail(e.target.value)}
+									className="w-full rounded-xl border px-3 py-2 text-sm"
+								/>
+							</div>
+							<div className="space-y-1">
+								<label className="text-sm font-medium">Passord</label>
+								<input
+									type="password"
+									value={adminLoginPassword}
+									onChange={(e) => setAdminLoginPassword(e.target.value)}
+									className="w-full rounded-xl border px-3 py-2 text-sm"
+								/>
+							</div>
+							<button
+								type="submit"
+								className="w-full rounded-xl bg-black px-4 py-2 text-sm font-medium text-white"
+							>
+								Logg inn
+							</button>
+						</form>
+
+						<p className="text-xs text-zinc-500">
+							Alternativt kan du logge inn med PIN via forsiden.
+						</p>
+					</div>
+				</main>
+			);
+		}
+	
+		if (!EFFECTIVE_ADMIN) {
 		return (
 			<main className="min-h-screen p-6">
 				<div className="max-w-2xl mx-auto space-y-3">
