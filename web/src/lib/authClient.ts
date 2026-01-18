@@ -1,13 +1,14 @@
 "use client";
 
 import {
-  browserLocalPersistence,
-  setPersistence,
-  signInWithCustomToken,
-  type UserCredential,
+	browserLocalPersistence,
+	setPersistence,
+	signInWithCustomToken,
+	type UserCredential,
 } from "firebase/auth";
 
 import { firebaseAuth } from "./firebaseClient";
+import { markSessionStart } from "./session";
 
 // Enkel helper rundt Firebase Auth for PIN-basert innlogging med custom token.
 // - Sørger for at session lagres i localStorage (browserLocalPersistence).
@@ -24,15 +25,19 @@ export async function signInWithCustomTokenAndRemember(
   // Sørg for at innloggingen overlever refresh / nye faner.
   await setPersistence(auth, browserLocalPersistence);
 
-  const cred = await signInWithCustomToken(auth, token);
+	  const cred = await signInWithCustomToken(auth, token);
 
-  try {
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(SESSION_KEY, new Date().toISOString());
-    }
-  } catch {
-    // Hvis localStorage ikke er tilgjengelig, ignorerer vi feilen.
-  }
+	  try {
+	    if (typeof window !== "undefined") {
+	      window.localStorage.setItem(SESSION_KEY, new Date().toISOString());
+	    }
+	    // I tillegg bruker vi en enkel "sessionStart"-markør med fast TTL (2 dager)
+	    // fra web/src/lib/session.ts, slik at vi har et konsistent hint på tvers
+	    // av sider om hvor nylig brukeren logget inn.
+	    markSessionStart();
+	  } catch {
+	    // Hvis localStorage ikke er tilgjengelig, ignorerer vi feilen.
+	  }
 
   return cred;
 }

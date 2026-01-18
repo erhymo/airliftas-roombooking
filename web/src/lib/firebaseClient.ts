@@ -61,3 +61,8 @@ export function getFirebaseFunctions(): Functions {
 	return _functions;
 }
 
+// Alias med samme navn som i noen eksempelsnutter
+export function firebaseFunctions(): Functions {
+	return getFirebaseFunctions();
+}
+
