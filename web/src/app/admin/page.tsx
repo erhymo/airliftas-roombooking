@@ -128,6 +128,31 @@ export default function AdminPage() {
 			// eslint-disable-next-line react-hooks/exhaustive-deps
 		}, []);
 
+			// --------------- forsøk å bootstrap admin via backend hvis e-post er hardkodet admin ---------------
+			useEffect(() => {
+				if (!authUid || isAdmin) return;
+
+				let cancelled = false;
+
+				(async () => {
+					try {
+						// Vil lykkes bare dersom backend (requireAdmin) anser brukeren som admin.
+						await fnAdminListUsersWithPins();
+						if (!cancelled) {
+							setIsAdmin(true);
+							setLoading(false);
+							await refreshAll();
+						}
+					} catch {
+						// Ikke admin – la isAdmin forbli false.
+					}
+				})();
+
+				return () => {
+					cancelled = true;
+				};
+			}, [authUid, isAdmin]);
+
 			// --------------- admin-innlogging (e-post/passord via Firebase Auth) ---------------
 			async function handleLocalAdminLogin(e: FormEvent) {
 				e.preventDefault();
