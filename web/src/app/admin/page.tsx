@@ -2,7 +2,13 @@
 
 import React, { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import {
+	onAuthStateChanged,
+	signOut,
+	signInWithEmailAndPassword,
+	setPersistence,
+	browserLocalPersistence,
+} from "firebase/auth";
 import {
 	collection,
 	getDocs,
@@ -13,6 +19,7 @@ import {
 } from "firebase/firestore";
 
 import { firebaseAuth, firebaseDb } from "@/lib/firebaseClient";
+import { markSessionStart } from "@/lib/session";
 import {
 	fnApproveUser,
 	fnAdminChangePin,
@@ -64,9 +71,7 @@ export default function AdminPage() {
 
 	const [loading, setLoading] = useState(true);
 	const [authUid, setAuthUid] = useState<string | null>(null);
-	const [isAdmin, setIsAdmin] = useState(false);
-	// Lokal, hardkodet admin-pålogging (kun klientside, ingen ekte sikkerhet)
-	const [localAdmin, setLocalAdmin] = useState(false);
+		const [isAdmin, setIsAdmin] = useState(false);
 	const [adminLoginEmail, setAdminLoginEmail] = useState("");
 	const [adminLoginPassword, setAdminLoginPassword] = useState("");
 	const [adminLoginError, setAdminLoginError] = useState<string | null>(null);
@@ -83,7 +88,7 @@ export default function AdminPage() {
 	const [busyPinUid, setBusyPinUid] = useState<string | null>(null);
 	const [busyApproveId, setBusyApproveId] = useState<string | null>(null);
 
-		// --------------- auth gate + admin check ---------------
+			// --------------- auth gate + admin check ---------------
 		// TODO (manuelt steg i Firebase Console/Firestore):
 		// Sørg for at minst én bruker har et dokument users/{uid} med
 		//   { role: "admin", status: "active" }
@@ -123,27 +128,30 @@ export default function AdminPage() {
 			// eslint-disable-next-line react-hooks/exhaustive-deps
 		}, []);
 
-		const EFFECTIVE_ADMIN = isAdmin || localAdmin;
+			// --------------- admin-innlogging (e-post/passord via Firebase Auth) ---------------
+			async function handleLocalAdminLogin(e: FormEvent) {
+				e.preventDefault();
+				setAdminLoginError(null);
 
-		// --------------- lokal admin-innlogging (brukernavn/passord) ---------------
-		const HARD_CODED_EMAIL = "oyvind.myhre@airlift.no";
-		const HARD_CODED_PASSWORD = "Mayeren123";
+				const email = adminLoginEmail.trim();
+				const password = adminLoginPassword;
+				if (!email || !password) {
+					setAdminLoginError("Fyll inn både e-post og passord.");
+					return;
+				}
 
-		function handleLocalAdminLogin(e: FormEvent) {
-			e.preventDefault();
-			setAdminLoginError(null);
-
-			if (
-				adminLoginEmail.trim() === HARD_CODED_EMAIL &&
-				adminLoginPassword === HARD_CODED_PASSWORD
-			) {
-				setLocalAdmin(true);
-				setAdminLoginPassword("");
-				return;
+				try {
+					// Sørg for at session overlever refresh / nye faner, lik PIN-innloggingen.
+					await setPersistence(auth, browserLocalPersistence);
+					await signInWithEmailAndPassword(auth, email, password);
+					setAdminLoginPassword("");
+					// Marker fresh session slik at /admin/bookings ikke kaster deg ut pga. isSessionExpired().
+					markSessionStart();
+				} catch (err: unknown) {
+					// Ikke lekke tekniske feilmeldinger til sluttbruker.
+					setAdminLoginError("Feil brukernavn eller passord.");
+				}
 			}
-
-			setAdminLoginError("Feil brukernavn eller passord.");
-		}
 
 	async function refreshAll() {
 		await Promise.all([loadPending(), loadUsersWithPins()]);
@@ -239,11 +247,11 @@ export default function AdminPage() {
 
 	async function handleLogout() {
 		await signOut(auth);
-		router.push("/");
+			router.push("/admin");
 	}
 
-		// --------------- UI ---------------
-		if (loading) {
+			// --------------- UI ---------------
+			if (loading) {
 			return (
 				<main className="min-h-screen p-6">
 					<div className="max-w-5xl mx-auto">Laster…</div>
@@ -251,7 +259,7 @@ export default function AdminPage() {
 			);
 		}
 	
-			if (!authUid && !localAdmin) {
+				if (!authUid) {
 				return (
 					<main className="min-h-screen p-6 text-zinc-900">
 						<div className="max-w-md mx-auto space-y-4">
@@ -301,7 +309,7 @@ export default function AdminPage() {
 			);
 		}
 	
-		if (!EFFECTIVE_ADMIN) {
+			if (!isAdmin) {
 		return (
 			<main className="min-h-screen p-6 text-zinc-900">
 				<div className="max-w-2xl mx-auto space-y-3">

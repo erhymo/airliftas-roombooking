@@ -237,7 +237,7 @@ export default function AdminBookingsPage() {
 
 	async function handleLogout() {
 		await signOut(auth);
-		router.push("/");
+			router.push("/admin");
 	}
 
 	// --------------- UI ---------------
