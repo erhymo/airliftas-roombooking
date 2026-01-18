@@ -291,16 +291,16 @@ export default function AdminBookingsPage() {
 		);
 	}
 
-	return (
-		<main className="min-h-screen p-6">
-			<div className="max-w-5xl mx-auto space-y-6">
-				<header className="flex items-center justify-between gap-4">
-					<div>
-						<h1 className="text-2xl font-semibold">Administrer bookinger</h1>
-						<p className="text-sm opacity-70">
-							Alle bookinger for Bergen-basen (kun admin).
-						</p>
-					</div>
+		return (
+			<main className="min-h-screen p-6">
+				<div className="max-w-5xl mx-auto space-y-6">
+					<header className="flex items-center justify-between gap-4">
+						<div>
+							<h1 className="text-2xl font-semibold">Administrer bookinger</h1>
+							<p className="text-sm text-zinc-800">
+								Alle bookinger for Bergen-basen (kun admin).
+							</p>
+						</div>
 
 					<div className="flex gap-2">
 						<button
@@ -320,7 +320,7 @@ export default function AdminBookingsPage() {
 
 				{msg && <div className="rounded-xl border p-3 text-sm">{msg}</div>}
 
-				<section className="rounded-2xl border p-4 space-y-3">
+						<section className="rounded-2xl border p-4 space-y-3">
 					<div className="flex items-center justify-between gap-3">
 						<h2 className="text-lg font-semibold">Bookinger – Bergen</h2>
 						<button
@@ -332,12 +332,12 @@ export default function AdminBookingsPage() {
 						</button>
 					</div>
 
-					{bookings.length === 0 ? (
-						<div className="text-sm opacity-70">Ingen bookinger funnet.</div>
+							{bookings.length === 0 ? (
+								<div className="text-sm text-zinc-800">Ingen bookinger funnet.</div>
 					) : (
 						<div className="overflow-x-auto">
-							<table className="w-full text-sm">
-								<thead className="text-left opacity-70">
+									<table className="w-full text-sm">
+										<thead className="text-left text-zinc-800">
 									<tr>
 										<th className="py-2">Rom</th>
 										<th className="py-2">Navn</th>
@@ -354,11 +354,11 @@ export default function AdminBookingsPage() {
 											<td className="py-2">{b.name}</td>
 											<td className="py-2">{fmt(b.from)}</td>
 											<td className="py-2">{fmt(b.to)}</td>
-											<td className="py-2">
-												<div className="text-xs">
-													<div>{b.createdByName || "—"}</div>
-													<div className="opacity-70">{b.createdByUid}</div>
-												</div>
+										<td className="py-2">
+											<div className="text-xs text-zinc-800">
+												<div>{b.createdByName || "—"}</div>
+												<div className="text-zinc-700">{b.createdByUid}</div>
+											</div>
 											</td>
 											<td className="py-2 text-right">
 												<button
@@ -376,7 +376,7 @@ export default function AdminBookingsPage() {
 					)}
 				</section>
 
-				{editId && (
+						{editId && (
 					<div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center p-4 z-50">
 						<div className="w-full max-w-lg rounded-2xl bg-white p-4 space-y-3">
 							<div className="flex items-start justify-between">
@@ -384,7 +384,7 @@ export default function AdminBookingsPage() {
 									<div className="text-lg font-semibold">
 										Rediger booking
 									</div>
-									<div className="text-sm opacity-70">
+									<div className="text-sm text-zinc-800">
 										Endre navn og tidsrom. Overlapp-sjekk gjør du manuelt.
 									</div>
 								</div>

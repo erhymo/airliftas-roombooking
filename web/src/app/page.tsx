@@ -180,7 +180,7 @@ export default function HomePage() {
 			<div className="mx-auto flex max-w-4xl flex-col gap-8">
 				<header className="space-y-2">
 					<h1 className="text-2xl font-semibold">Airliftas – PIN-innlogging</h1>
-					<p className="text-sm text-zinc-600">
+						<p className="text-base text-zinc-800">
 						Registrer deg som bruker, sett PIN når du er godkjent, og logg inn med
 							PIN. Admin-grensesnittet finner du på <code>/admin</code>.
 					</p>
@@ -196,7 +196,7 @@ export default function HomePage() {
 					{/* Ny registreringsforespørsel */}
 					<div className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4">
 						<h2 className="text-lg font-medium">1. Registrer deg</h2>
-						<p className="text-sm text-zinc-600">
+							<p className="text-sm text-zinc-800">
 							Fyll inn navn og telefon. En admin godkjenner deg, og deretter kan du
 								sette PIN.
 						</p>
@@ -232,12 +232,12 @@ export default function HomePage() {
 					{/* Status + sett PIN */}
 					<div className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4">
 						<h2 className="text-lg font-medium">2. Status &amp; PIN</h2>
-						<p className="text-sm text-zinc-600">
+							<p className="text-sm text-zinc-800">
 							Vi bruker en hemmelig requestKey lagret i nettleseren din for å
 								finne forespørselen din.
 						</p>
 
-						<div className="flex items-center gap-2 text-xs text-zinc-600">
+							<div className="flex items-center gap-2 text-sm text-zinc-800">
 							<span className="font-mono">
 								{requestKey ? "RequestKey er lagret" : "Ingen requestKey lagret"}
 							</span>
@@ -298,7 +298,7 @@ export default function HomePage() {
 
 				<section className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4 md:max-w-md">
 					<h2 className="text-lg font-medium">3. Logg inn med PIN</h2>
-					<p className="text-sm text-zinc-600">
+						<p className="text-sm text-zinc-800">
 						Når du har fått PIN, kan du logge inn her. Admin-grensesnittet krever at
 							brukeren din har rollen <code>admin</code> i Firestore.
 					</p>

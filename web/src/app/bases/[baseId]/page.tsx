@@ -63,17 +63,17 @@ export default function BasePage() {
 		);
 	}
 
-	return (
-		<main className="min-h-screen p-6">
-			<div className="max-w-md mx-auto space-y-4">
-					<header className="space-y-1">
-						<div className="flex items-start justify-between gap-4">
-							<div>
-								<h1 className="text-2xl font-semibold">{title}</h1>
-								<p className="text-sm opacity-80">
-									Neste etappe: plantegning (SVG) + romklikk + booking
-								</p>
-							</div>
+		return (
+			<main className="min-h-screen p-6">
+				<div className="max-w-md mx-auto space-y-4">
+						<header className="space-y-1">
+							<div className="flex items-start justify-between gap-4">
+								<div>
+									<h1 className="text-2xl font-semibold">{title}</h1>
+									<p className="text-sm text-zinc-800">
+										Neste etappe: plantegning (SVG) + romklikk + booking
+									</p>
+								</div>
 							{!isOnline && (
 								<span className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800">
 									Offline – synker når online
@@ -82,12 +82,12 @@ export default function BasePage() {
 						</div>
 					</header>
 
-				<div className="rounded-2xl border p-4 space-y-3">
-					<div className="font-medium">Status</div>
-					<div className="text-sm opacity-80">
-						Denne siden er en placeholder. I neste etappe legger vi inn SVG
-						for rom, klikking, og booking-logikk.
-					</div>
+						<div className="rounded-2xl border p-4 space-y-3">
+							<div className="font-medium">Status</div>
+							<div className="text-sm text-zinc-800">
+								Denne siden er en placeholder. I neste etappe legger vi inn SVG
+								for rom, klikking, og booking-logikk.
+							</div>
 				</div>
 
 				<div className="flex gap-2">

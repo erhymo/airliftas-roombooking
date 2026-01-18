@@ -266,16 +266,16 @@ export default function AdminPage() {
 		);
 	}
 
-	return (
-		<main className="min-h-screen p-6">
-			<div className="max-w-6xl mx-auto space-y-6">
-				<header className="flex items-center justify-between gap-4">
-					<div>
-						<h1 className="text-2xl font-semibold">Adminpanel</h1>
-						<p className="text-sm opacity-70">
-							Godkjenn brukere, se/endre pinkoder
-						</p>
-					</div>
+		return (
+			<main className="min-h-screen p-6">
+				<div className="max-w-6xl mx-auto space-y-6">
+					<header className="flex items-center justify-between gap-4">
+						<div>
+							<h1 className="text-2xl font-semibold">Adminpanel</h1>
+							<p className="text-sm text-zinc-800">
+								Godkjenn brukere, se/endre pinkoder
+							</p>
+						</div>
 
 						<div className="flex gap-2">
 							<button
@@ -302,9 +302,9 @@ export default function AdminPage() {
 				{msg && <div className="rounded-xl border p-3 text-sm">{msg}</div>}
 
 				{/* Pending requests */}
-				<section className="rounded-2xl border p-4 space-y-3">
-					<div className="flex items-center justify-between gap-3">
-						<h2 className="text-lg font-semibold">Ventende forespørsler</h2>
+						<section className="rounded-2xl border p-4 space-y-3">
+							<div className="flex items-center justify-between gap-3">
+								<h2 className="text-lg font-semibold">Ventende forespørsler</h2>
 						<button
 							onClick={loadPending}
 							disabled={refreshingPending}
@@ -314,14 +314,14 @@ export default function AdminPage() {
 						</button>
 					</div>
 
-					{pending.length === 0 ? (
-						<div className="text-sm opacity-70">
+							{pending.length === 0 ? (
+								<div className="text-sm text-zinc-800">
 							Ingen ventende forespørsler.
 						</div>
 					) : (
 						<div className="overflow-x-auto">
-							<table className="w-full text-sm">
-								<thead className="text-left opacity-70">
+									<table className="w-full text-sm">
+										<thead className="text-left text-zinc-800">
 									<tr>
 										<th className="py-2">Navn</th>
 										<th className="py-2">Telefon</th>
@@ -355,7 +355,7 @@ export default function AdminPage() {
 				</section>
 
 				{/* Users + pins */}
-				<section className="rounded-2xl border p-4 space-y-3">
+						<section className="rounded-2xl border p-4 space-y-3">
 					<div className="flex items-center justify-between gap-3">
 						<h2 className="text-lg font-semibold">Brukere og pinkoder</h2>
 						<button
@@ -367,12 +367,12 @@ export default function AdminPage() {
 						</button>
 					</div>
 
-					{users.length === 0 ? (
-						<div className="text-sm opacity-70">Ingen brukere funnet.</div>
+							{users.length === 0 ? (
+								<div className="text-sm text-zinc-800">Ingen brukere funnet.</div>
 					) : (
 						<div className="overflow-x-auto">
-							<table className="w-full text-sm">
-								<thead className="text-left opacity-70">
+									<table className="w-full text-sm">
+										<thead className="text-left text-zinc-800">
 									<tr>
 										<th className="py-2">Navn</th>
 										<th className="py-2">Telefon</th>
@@ -419,7 +419,7 @@ export default function AdminPage() {
 								</tbody>
 							</table>
 
-							<div className="text-xs opacity-70 mt-3">
+									<div className="text-xs text-zinc-800 mt-3">
 								Merk: Ved kollisjon/ugyldig PIN vises alltid samme melding (
 									“Pinkode ikke godkjent – prøv en ny.”
 								) for å ikke lekke info.

@@ -92,13 +92,13 @@ export default function BasePage() {
 				? "Kinsarvik"
 				: baseId;
 
-	return (
-		<main className="min-h-screen p-6">
-			<div className="max-w-md mx-auto space-y-4">
-				<h1 className="text-2xl font-semibold">{title}</h1>
-				<div className="rounded-2xl border p-4 text-sm opacity-80">
-					Placeholder. Neste etapper: SVG + booking for denne basen.
-				</div>
+		return (
+			<main className="min-h-screen p-6">
+				<div className="max-w-md mx-auto space-y-4">
+					<h1 className="text-2xl font-semibold">{title}</h1>
+					<div className="rounded-2xl border p-4 text-sm text-zinc-800">
+						Placeholder. Neste etapper: SVG + booking for denne basen.
+					</div>
 				<button
 					onClick={() => router.push("/bases")}
 					className="w-full rounded-xl border py-3 font-medium"
