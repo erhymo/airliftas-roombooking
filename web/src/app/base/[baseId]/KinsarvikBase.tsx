@@ -445,11 +445,11 @@ export default function KinsarvikBase() {
 										<text x={x + 10} y={y + 24} fontSize={14} fontWeight="600">
 											{ROOMS.find((r) => r.id === rid)?.label}
 										</text>
-										<foreignObject x={x + 10} y={y + 30} width={roomWidth - 20} height={60}>
-											<div xmlns="http://www.w3.org/1999/xhtml">
-												{planRoom(rid)}
-											</div>
-										</foreignObject>
+											<foreignObject x={x + 10} y={y + 30} width={roomWidth - 20} height={60}>
+												<div>
+													{planRoom(rid)}
+												</div>
+											</foreignObject>
 									</g>
 								);
 							})}

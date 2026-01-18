@@ -571,11 +571,11 @@ export default function BergenBase() {
 										<text x="60" y={y + 28} fontSize="16" fontWeight="600">
 											{ROOMS.find((r) => r.id === rid)?.label}
 										</text>
-										<foreignObject x="60" y={y + 34} width="320" height="52">
-											<div xmlns="http://www.w3.org/1999/xhtml">
-												{planRoom(rid)}
-											</div>
-										</foreignObject>
+											<foreignObject x="60" y={y + 34} width="320" height="52">
+												<div>
+													{planRoom(rid)}
+												</div>
+											</foreignObject>
 									</g>
 								);
 							})}
@@ -606,11 +606,11 @@ export default function BergenBase() {
 										<text x="530" y={y + 28} fontSize="16" fontWeight="600">
 											{ROOMS.find((r) => r.id === rid)?.label}
 										</text>
-										<foreignObject x="530" y={y + 34} width="320" height="52">
-											<div xmlns="http://www.w3.org/1999/xhtml">
-												{planRoom(rid)}
-											</div>
-										</foreignObject>
+											<foreignObject x="530" y={y + 34} width="320" height="52">
+												<div>
+													{planRoom(rid)}
+												</div>
+											</foreignObject>
 									</g>
 								);
 							})}
