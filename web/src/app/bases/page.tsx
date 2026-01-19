@@ -68,7 +68,7 @@ export default function BasesPage() {
 					{BASES.map((b) => (
 						<button
 							key={b.id}
-							onClick={() => router.push(`/bases/${b.id}`)}
+								onClick={() => router.push(`/base/${b.id}`)}
 							className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium hover:bg-zinc-50"
 						>
 							{b.name}
