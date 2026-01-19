@@ -53,14 +53,14 @@ export default function HomePage() {
 				);
 				markSessionStart();
 				setMsg("Innlogging vellykket. Sender deg til rombooking…");
-				router.push("/bases");
+					router.push("/home");
 				return;
 			}
 
 			const { token } = await fnLoginWithPin(pin);
 			await signInWithCustomTokenAndRemember(token);
 			setMsg("Innlogging vellykket. Sender deg til rombooking…");
-			router.push("/bases");
+				router.push("/home");
 		} catch {
 			setMsg("Pinkode ikke godkjent – prøv en ny.");
 		} finally {
