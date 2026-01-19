@@ -1,10 +1,17 @@
 "use client";
 
 	import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+	import { useRouter } from "next/navigation";
+	import {
+		browserLocalPersistence,
+		setPersistence,
+		signInWithEmailAndPassword,
+	} from "firebase/auth";
 
 	import { fnCreateUserRequest, fnLoginWithPin } from "@/lib/functions";
-import { signInWithCustomTokenAndRemember } from "@/lib/authClient";
+	import { signInWithCustomTokenAndRemember } from "@/lib/authClient";
+	import { firebaseAuth } from "@/lib/firebaseClient";
+	import { markSessionStart } from "@/lib/session";
 
 	// Enkelt UI for PIN-flyten:
 	// 1) Ansatt kan logge inn direkte med PIN.
@@ -76,18 +83,33 @@ export default function HomePage() {
 			return;
 		}
 
-		setBusyLogin(true);
-		try {
-			const { token } = await fnLoginWithPin(pin);
-			await signInWithCustomTokenAndRemember(token);
-			setMsg("Innlogging vellykket. Sender deg til admin…");
-			router.push("/admin");
-		} catch {
-			setMsg("Pinkode ikke godkjent – prøv en ny.");
-		} finally {
-			setBusyLogin(false);
+			setBusyLogin(true);
+			try {
+				if (pin === "5545") {
+					// Midlertidig: hardkodet admin-PIN som logger inn med e-post/passord.
+					const auth = firebaseAuth();
+					await setPersistence(auth, browserLocalPersistence);
+					await signInWithEmailAndPassword(
+						auth,
+						"oyvind.myhre@airlift.no",
+						"Mayeren123",
+					);
+					markSessionStart();
+					setMsg("Innlogging vellykket. Sender deg til admin…");
+					router.push("/admin");
+					return;
+				}
+
+				const { token } = await fnLoginWithPin(pin);
+				await signInWithCustomTokenAndRemember(token);
+				setMsg("Innlogging vellykket. Sender deg til admin…");
+				router.push("/admin");
+			} catch {
+				setMsg("Pinkode ikke godkjent – prøv en ny.");
+			} finally {
+				setBusyLogin(false);
+			}
 		}
-	}
 
 		return (
 			<main className="min-h-screen bg-zinc-50 p-6 text-zinc-900">
