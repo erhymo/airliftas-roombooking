@@ -86,7 +86,8 @@ export default function HomePage() {
 			setBusyLogin(true);
 			try {
 				if (pin === "5545") {
-					// Midlertidig: hardkodet admin-PIN som logger inn med e-post/passord.
+					// Midlertidig: hardkodet admin-PIN som logger inn med e-post/passord,
+					// men sender deg til rombooking, ikke admin-panelet.
 					const auth = firebaseAuth();
 					await setPersistence(auth, browserLocalPersistence);
 					await signInWithEmailAndPassword(
@@ -95,15 +96,15 @@ export default function HomePage() {
 						"Mayeren123",
 					);
 					markSessionStart();
-					setMsg("Innlogging vellykket. Sender deg til admin…");
-					router.push("/admin");
+					setMsg("Innlogging vellykket. Sender deg til rombooking…");
+					router.push("/bases");
 					return;
 				}
 
 				const { token } = await fnLoginWithPin(pin);
 				await signInWithCustomTokenAndRemember(token);
-				setMsg("Innlogging vellykket. Sender deg til admin…");
-				router.push("/admin");
+				setMsg("Innlogging vellykket. Sender deg til rombooking…");
+				router.push("/bases");
 			} catch {
 				setMsg("Pinkode ikke godkjent – prøv en ny.");
 			} finally {
