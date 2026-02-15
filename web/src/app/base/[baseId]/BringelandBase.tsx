@@ -90,6 +90,34 @@ function addDays(d: Date, days: number) {
 	return x;
 }
 
+		function startOfWeekMonday(d: Date) {
+			const x = new Date(d);
+			x.setHours(0, 0, 0, 0);
+			const day = x.getDay(); // 0 = søndag, 1 = mandag, ...
+			const diff = (day + 6) % 7; // antall dager tilbake til mandag
+			return addDays(x, -diff);
+		}
+
+		function formatWeekdayShort(d: Date) {
+			return new Intl.DateTimeFormat("nb-NO", { weekday: "short" })
+				.format(d)
+				.replace(".", "");
+		}
+
+		function getIsoWeek(date: Date): number {
+			const d = new Date(
+				Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
+			);
+			const dayNum = d.getUTCDay() || 7;
+			// Sett dato til torsdag i denne uken
+			d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+			const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+			const weekNo = Math.ceil(
+				((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7,
+			);
+			return weekNo;
+		}
+
 function clampMaxOneMonth(from: Date, to: Date) {
 	const max = new Date(from);
 	max.setMonth(max.getMonth() + 1);
@@ -158,6 +186,25 @@ export default function BringelandBase() {
 	const [fromTime, setFromTime] = useState<string>("18:00");
 	const [toTime, setToTime] = useState<string>("18:00");
 	const [showOverview, setShowOverview] = useState(false);
+			const [calendarStart] = useState<Date>(() =>
+				startOfWeekMonday(startOfTodayLocal()),
+			);
+
+			const calendarDays = useMemo(() => {
+				return Array.from({ length: 14 }, (_, idx) => addDays(calendarStart, idx));
+			}, [calendarStart]);
+
+			const today = startOfTodayLocal();
+			const firstWeekNumber =
+				calendarDays.length > 0 ? getIsoWeek(calendarDays[0]) : null;
+			const secondWeekNumber =
+				calendarDays.length > 7 ? getIsoWeek(calendarDays[7]) : null;
+				const weekLabel =
+					firstWeekNumber !== null
+						? secondWeekNumber !== null && secondWeekNumber !== firstWeekNumber
+							? `Uke ${firstWeekNumber}-${secondWeekNumber}`
+							: `Uke ${firstWeekNumber}`
+						: "";
 
 	useEffect(() => {
 		const unsub = onAuthStateChanged(auth, async (u) => {
@@ -257,18 +304,32 @@ export default function BringelandBase() {
 		return { kind, current, next };
 	}
 
-	function openBooking(roomId: RoomId) {
-		setMsg(null);
-		setEditBookingId(null);
-		setOpenRoom(roomId);
-		setStep("date");
+		function isRoomOccupiedOnDate(roomId: RoomId, day: Date) {
+			const dayStart = new Date(day);
+			dayStart.setHours(0, 0, 0, 0);
+			const dayEnd = addDays(dayStart, 1);
+			return bookings.some(
+				(b) =>
+					b.roomId === roomId && overlaps(b.from, b.to, dayStart, dayEnd),
+			);
+		}
 
-		const todayStr = formatDateInput(startOfTodayLocal());
-		setFromDate(todayStr);
-		setToDate(formatDateInput(addDays(startOfTodayLocal(), 1)));
-		setFromTime("18:00");
-		setToTime("18:00");
-	}
+		function openBooking(roomId: RoomId, day?: Date) {
+			setMsg(null);
+			setEditBookingId(null);
+			setOpenRoom(roomId);
+			setStep("date");
+
+			const base = day ? new Date(day) : startOfTodayLocal();
+			base.setHours(0, 0, 0, 0);
+			const fromD = base;
+			const toD = addDays(fromD, 1);
+
+			setFromDate(formatDateInput(fromD));
+			setToDate(formatDateInput(toD));
+			setFromTime("18:00");
+			setToTime("18:00");
+		}
 
 	function openEdit(booking: Booking) {
 		if (booking.createdByUid !== uid) return;
@@ -424,6 +485,89 @@ export default function BringelandBase() {
 				</header>
 
 				{msg && <div className="rounded-xl border p-3 text-sm">{msg}</div>}
+
+					<section className="rounded-2xl border p-4 space-y-3">
+							<div className="flex items-center justify-between gap-4">
+								<div className="font-semibold">Kalender (2 uker)</div>
+								<div className="text-[11px] text-zinc-700 text-right">
+									<div>
+										Starter på mandag denne uken og viser 14 dager frem.
+									</div>
+									{weekLabel && (
+										<div className="text-[11px] text-zinc-500">{weekLabel}</div>
+									)}
+								</div>
+							</div>
+						<div className="space-y-2 text-xs">
+							{ROOMS.map((room) => {
+								const firstWeek = calendarDays.slice(0, 7);
+								const secondWeek = calendarDays.slice(7, 14);
+								return (
+									<div
+										key={room.id}
+										className="space-y-1 rounded-xl border px-2 py-1"
+									>
+										<div className="flex items-center justify-between gap-2">
+											<div className="text-[11px] font-medium">
+												{room.label}
+											</div>
+										</div>
+										<div className="space-y-1">
+											<div className="grid grid-cols-7 gap-1">
+												{firstWeek.map((day) => {
+													const occupied = isRoomOccupiedOnDate(room.id, day);
+													const isToday = day.getTime() === today.getTime();
+													return (
+														<div
+															key={day.toISOString()}
+															className={
+																"flex h-7 flex-col items-center justify-center rounded text-[10px] cursor-pointer " +
+																(occupied
+																	? "bg-red-100 text-red-800"
+																	: "bg-emerald-100 text-emerald-800") +
+																(isToday ? " ring-2 ring-blue-500" : "")
+															}
+															onClick={() => openBooking(room.id, day)}
+															title={`${formatWeekdayShort(day)} ${day.toLocaleDateString("nb-NO")}`}
+														>
+															<div>{formatWeekdayShort(day)}</div>
+															<div>{day.getDate()}</div>
+														</div>
+													);
+												})}
+											</div>
+											<div className="grid grid-cols-7 gap-1">
+												{secondWeek.map((day) => {
+													const occupied = isRoomOccupiedOnDate(room.id, day);
+													const isToday = day.getTime() === today.getTime();
+													return (
+														<div
+															key={day.toISOString()}
+															className={
+																"flex h-7 flex-col items-center justify-center rounded text-[10px] cursor-pointer " +
+																(occupied
+																	? "bg-red-100 text-red-800"
+																	: "bg-emerald-100 text-emerald-800") +
+																(isToday ? " ring-2 ring-blue-500" : "")
+															}
+															onClick={() => openBooking(room.id, day)}
+															title={`${formatWeekdayShort(day)} ${day.toLocaleDateString("nb-NO")}`}
+														>
+															<div>{formatWeekdayShort(day)}</div>
+															<div>{day.getDate()}</div>
+														</div>
+													);
+												})}
+											</div>
+										</div>
+									</div>
+								);
+							})}
+						</div>
+						<div className="text-[11px] text-zinc-700">
+							Grønn = ledig hele døgnet, rød = opptatt minst en del av døgnet.
+						</div>
+					</section>
 
 				<section className="rounded-2xl border p-4 space-y-3">
 					<div className="flex items-center justify-between gap-4">
