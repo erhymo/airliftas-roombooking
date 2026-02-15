@@ -10,13 +10,15 @@ import {
 	browserLocalPersistence,
 } from "firebase/auth";
 import {
-	collection,
-	getDocs,
-	orderBy,
-	query,
-	where,
-	Timestamp,
-} from "firebase/firestore";
+		collection,
+		getDocs,
+		orderBy,
+		query,
+		where,
+		Timestamp,
+		deleteDoc,
+		doc,
+	} from "firebase/firestore";
 
 import { firebaseAuth, firebaseDb } from "@/lib/firebaseClient";
 import { markSessionStart } from "@/lib/session";
@@ -80,15 +82,16 @@ export default function AdminPage() {
 
 	const [msg, setMsg] = useState<string | null>(null);
 
-	const [pending, setPending] = useState<PendingRequest[]>([]);
-		const [users, setUsers] = useState<AdminUserRow[]>([]);
+		const [pending, setPending] = useState<PendingRequest[]>([]);
+			const [users, setUsers] = useState<AdminUserRow[]>([]);
 
-	const [refreshingPending, setRefreshingPending] = useState(false);
-	const [refreshingUsers, setRefreshingUsers] = useState(false);
+		const [refreshingPending, setRefreshingPending] = useState(false);
+		const [refreshingUsers, setRefreshingUsers] = useState(false);
 
-	const [pinEdits, setPinEdits] = useState<Record<string, string>>({}); // uid -> newPin
-	const [busyPinUid, setBusyPinUid] = useState<string | null>(null);
-	const [busyApproveId, setBusyApproveId] = useState<string | null>(null);
+		const [pinEdits, setPinEdits] = useState<Record<string, string>>({}); // uid -> newPin
+		const [busyPinUid, setBusyPinUid] = useState<string | null>(null);
+		const [busyApproveId, setBusyApproveId] = useState<string | null>(null);
+		const [busyDeleteId, setBusyDeleteId] = useState<string | null>(null);
 
 			// --------------- auth gate + admin check ---------------
 		// TODO (manuelt steg i Firebase Console/Firestore):
@@ -242,21 +245,35 @@ export default function AdminPage() {
 	}
 
 	// --------------- actions ---------------
-	async function handleApprove(requestId: string) {
-		setMsg(null);
-		setBusyApproveId(requestId);
-		try {
-			await fnApproveUser(requestId);
-			setMsg("Bruker godkjent.");
-			await loadPending();
-			// Brukerlista endres (ny user), så refresh den også:
-			await loadUsersWithPins();
-		} catch {
-			setMsg("Kunne ikke godkjenne. Sjekk admin-rettigheter.");
-		} finally {
-			setBusyApproveId(null);
+		async function handleApprove(requestId: string) {
+			setMsg(null);
+			setBusyApproveId(requestId);
+			try {
+				await fnApproveUser(requestId);
+				setMsg("Bruker godkjent.");
+				await loadPending();
+				// Brukerlista endres (ny user), så refresh den også:
+				await loadUsersWithPins();
+			} catch {
+				setMsg("Kunne ikke godkjenne. Sjekk admin-rettigheter.");
+			} finally {
+				setBusyApproveId(null);
+			}
 		}
-	}
+
+		async function handleDeleteRequest(requestId: string) {
+			setMsg(null);
+			setBusyDeleteId(requestId);
+			try {
+				await deleteDoc(doc(db, "userRequests", requestId));
+				setMsg("Forespørsel slettet.");
+				await loadPending();
+			} catch {
+				setMsg("Kunne ikke slette forespørsel. Sjekk admin-rettigheter.");
+			} finally {
+				setBusyDeleteId(null);
+			}
+		}
 
 	async function handleChangePin(uid: string) {
 		setMsg(null);
@@ -438,17 +455,24 @@ export default function AdminPage() {
 											<td className="py-2">{r.name}</td>
 											<td className="py-2">{r.phone}</td>
 											<td className="py-2">{fmtDate(r.createdAt)}</td>
-											<td className="py-2 text-right">
-												<button
-													onClick={() => handleApprove(r.id)}
-													disabled={busyApproveId === r.id}
-													className="rounded-xl bg-black text-white px-3 py-2 text-sm"
-												>
-													{busyApproveId === r.id
-															? "Godkjenner…"
-															: "Godkjenn"}
-												</button>
-											</td>
+								<td className="py-2 text-right space-x-2">
+									<button
+										onClick={() => handleApprove(r.id)}
+										disabled={busyApproveId === r.id || busyDeleteId === r.id}
+										className="rounded-xl bg-black text-white px-3 py-2 text-sm"
+									>
+										{busyApproveId === r.id
+													? "Godkjenner…"
+													: "Godkjenn"}
+									</button>
+									<button
+										onClick={() => handleDeleteRequest(r.id)}
+										disabled={busyDeleteId === r.id || busyApproveId === r.id}
+										className="rounded-xl border border-red-300 px-3 py-2 text-sm text-red-700"
+									>
+										{busyDeleteId === r.id ? "Sletter…" : "Slett"}
+									</button>
+								</td>
 										</tr>
 									))}
 								</tbody>
