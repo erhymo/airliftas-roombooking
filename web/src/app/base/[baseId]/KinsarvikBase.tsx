@@ -21,6 +21,7 @@ import {
 import { firebaseAuth, firebaseDb } from "@/lib/firebaseClient";
 import { isSessionExpired } from "@/lib/session";
 import { useOnlineStatus } from "@/lib/useOnlineStatus";
+import AppShell from "@/components/AppShell";
 
 type RoomId = "R1" | "R2" | "R3" | "R4" | "R5" | "R6";
 
@@ -136,6 +137,7 @@ export default function KinsarvikBase() {
 	);
 	const [fromTime, setFromTime] = useState<string>("18:00");
 	const [toTime, setToTime] = useState<string>("18:00");
+	const [showOverview, setShowOverview] = useState(false);
 
 	useEffect(() => {
 		const unsub = onAuthStateChanged(auth, async (u) => {
@@ -369,27 +371,32 @@ export default function KinsarvikBase() {
 	const roomsRow: RoomId[] = ["R1", "R2", "R3", "R4", "R5", "R6"];
 
 	return (
-		<main className="min-h-screen p-6">
-			<div className="max-w-3xl mx-auto space-y-4">
-				<header className="flex items-start justify-between gap-4">
+		<AppShell
+			title="Kinsarvik"
+			subtitle="Brakke: 6 rom på rekke + stue. Booking: dato -> tid (default 18:00-18:00)."
+			backHref="/bases"
+				offline={!isOnline}
+			>
+			<div className="max-w-3xl mx-auto space-y-3 sm:space-y-4">
+						<header className="sr-only">
 					<div>
 						<h1 className="text-2xl font-semibold">Kinsarvik</h1>
 						<p className="text-sm leading-relaxed text-zinc-900">
 							Brakke: 6 rom på rekke + stue. Booking: dato → tid (default 18:00–18:00).
 						</p>
 					</div>
-					<div className="flex flex-col items-end gap-2">
+				<div className="hidden flex-col items-end gap-2">
 						{!isOnline && (
 							<span className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800">
 								Offline  synker ne5r online
 							</span>
 						)}
-						<button
-							onClick={() => router.push("/bases")}
-							className="rounded-xl border px-4 py-2"
-						>
-							Tilbake
-						</button>
+					<button
+						onClick={() => router.push("/bases")}
+						className="hidden rounded-xl border px-4 py-2"
+					>
+						Tilbake
+					</button>
 					</div>
 				</header>
 
@@ -398,8 +405,12 @@ export default function KinsarvikBase() {
 				<section className="rounded-2xl border p-4 space-y-3">
 					<div className="font-semibold">Plantegning</div>
 
-					<div className="w-full overflow-x-auto">
-						<svg viewBox="0 0 900 260" className="w-full min-w-[700px]">
+					<div className="w-full">
+						<svg
+							viewBox="0 0 900 260"
+							preserveAspectRatio="xMidYMid meet"
+							className="h-auto w-full"
+						>
 							<rect
 								x="10"
 								y="30"
@@ -485,11 +496,22 @@ export default function KinsarvikBase() {
 						Tips: klikk et rom for å booke. Klikk en booking i listen under for å
 						redigere (kun egne).
 					</div>
-					</section>
+				</section>
 
-					<section className="rounded-2xl border p-4 space-y-3">
+				<section className="rounded-2xl border p-4 space-y-3">
+					<div className="flex items-center justify-between">
 						<div className="font-semibold">Oversikt per rom</div>
-						<div className="divide-y rounded-xl border text-sm">
+						<button
+							type="button"
+							onClick={() => setShowOverview((v) => !v)}
+							className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium text-zinc-700 sm:hidden"
+						>
+							{showOverview ? "Skjul oversikt" : "Vis oversikt"}
+						</button>
+					</div>
+					<div
+						className={`divide-y rounded-xl border text-sm ${showOverview ? "block" : "hidden sm:block"}`}
+					>
 							{ROOMS.map((room) => {
 								const { kind, current, next } = getRoomOverview(room.id);
 
@@ -711,7 +733,7 @@ export default function KinsarvikBase() {
 						</div>
 					</div>
 				)}
-			</div>
-		</main>
+				</div>
+			</AppShell>
 	);
 }

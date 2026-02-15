@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
+import AppShell from "@/components/AppShell";
 import {
 	addDoc,
 	collection,
@@ -19,8 +20,8 @@ import {
 } from "firebase/firestore";
 
 	import { firebaseAuth, firebaseDb } from "@/lib/firebaseClient";
-	import { isSessionExpired } from "@/lib/session";
-	import { useOnlineStatus } from "@/lib/useOnlineStatus";
+		import { isSessionExpired } from "@/lib/session";
+		import { useOnlineStatus } from "@/lib/useOnlineStatus";
 
 type RoomId = "R1" | "R2" | "R3" | "R4" | "R5" | "R6";
 
@@ -160,6 +161,7 @@ export default function BergenBase() {
 	);
 	const [hotelFromTime, setHotelFromTime] = useState<string>("14:00");
 	const [hotelToTime, setHotelToTime] = useState<string>("14:00");
+		const [showOverview, setShowOverview] = useState(false);
 
 	useEffect(() => {
 		const unsub = onAuthStateChanged(auth, async (u) => {
@@ -484,17 +486,22 @@ export default function BergenBase() {
 		return roomStatus(roomId);
 	}
 
-	return (
-		<main className="min-h-screen p-6">
-			<div className="max-w-3xl mx-auto space-y-4">
-					<header className="flex items-start justify-between gap-4">
+		return (
+			<AppShell
+				title="Bergen"
+				subtitle="Brakke: 6 rom (3 + gang + 3). Booking: dato -> tid (default 14:00-14:00)."
+				backHref="/bases"
+				offline={!isOnline}
+			>
+				<div className="max-w-3xl mx-auto space-y-3 sm:space-y-4">
+						<header className="sr-only">
 						<div>
 							<h1 className="text-2xl font-semibold">Bergen</h1>
 							<p className="text-sm leading-relaxed text-zinc-900">
 								Brakke: 6 rom (3 + gang + 3). Booking: dato → tid (default 14:00–14:00).
 							</p>
 						</div>
-						<div className="flex flex-col items-end gap-2">
+						<div className="hidden flex-col items-end gap-2">
 							{!isOnline && (
 								<span className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800">
 								Offline  synker ne5r online
@@ -502,7 +509,7 @@ export default function BergenBase() {
 							)}
 							<button
 								onClick={() => router.push("/bases")}
-								className="rounded-xl border px-4 py-2"
+								className="hidden rounded-xl border px-4 py-2"
 							>
 								Tilbake
 							</button>
@@ -511,11 +518,15 @@ export default function BergenBase() {
 
 				{msg && <div className="rounded-xl border p-3 text-sm">{msg}</div>}
 
-				<section className="rounded-2xl border p-4 space-y-3">
-					<div className="font-semibold">Plantegning</div>
-
-					<div className="w-full overflow-x-auto">
-						<svg viewBox="0 0 900 360" className="w-full min-w-[700px]">
+					<section className="rounded-2xl border p-4 space-y-3">
+						<div className="font-semibold">Plantegning</div>
+					
+						<div className="w-full">
+							<svg
+								viewBox="0 0 900 360"
+								preserveAspectRatio="xMidYMid meet"
+								className="h-auto w-full"
+							>
 							<rect
 								x="10"
 								y="10"
@@ -622,9 +633,22 @@ export default function BergenBase() {
 					</div>
 				</section>
 
-				<section className="rounded-2xl border p-4 space-y-3">
-					<div className="font-semibold">Oversikt per rom</div>
-					<div className="divide-y rounded-xl border text-sm">
+					<section className="rounded-2xl border p-4 space-y-3">
+						<div className="flex items-center justify-between">
+							<div className="font-semibold">Oversikt per rom</div>
+							<button
+								type="button"
+								onClick={() => setShowOverview((v) => !v)}
+								className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium text-zinc-700 sm:hidden"
+							>
+								{showOverview ? "Skjul oversikt" : "Vis oversikt"}
+							</button>
+						</div>
+						<div
+							className={`divide-y rounded-xl border text-sm ${
+								showOverview ? "block" : "hidden sm:block"
+							}`}
+						>
 						{ROOMS.map((room) => {
 							const { kind, current, next } = getRoomOverview(room.id);
 
@@ -903,88 +927,87 @@ export default function BergenBase() {
 						</div>
 					</div>
 				)}
-
-				{/* HOTEL MODAL */}
-				{hotelOpen && (
-					<div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center p-4 z-50">
-						<div className="w-full max-w-lg rounded-2xl bg-white p-4 space-y-3">
-							<div className="flex items-start justify-between">
-								<div>
-									<div className="text-lg font-semibold">Legg til hotell</div>
-								<div className="text-sm text-zinc-900">Kun info til andre</div>
+					{/* HOTEL MODAL */}
+					{hotelOpen && (
+						<div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center p-4 z-50">
+							<div className="w-full max-w-lg rounded-2xl bg-white p-4 space-y-3">
+								<div className="flex items-start justify-between">
+									<div>
+										<div className="text-lg font-semibold">Legg til hotell</div>
+										<div className="text-sm text-zinc-900">Kun info til andre</div>
+									</div>
+									<button
+										onClick={() => setHotelOpen(false)}
+										className="rounded-xl border px-3 py-2 text-sm"
+									>
+										Lukk
+									</button>
 								</div>
+								
+								<label className="block text-sm">
+									Navn
+									<input
+										value={hotelName}
+										onChange={(e) => setHotelName(e.target.value)}
+										className="mt-1 w-full rounded-xl border p-3"
+										placeholder="Fornavn Etternavn"
+									/>
+								</label>
+								
+								<div className="grid grid-cols-2 gap-2">
+									<label className="block text-sm">
+										Fra dato
+										<input
+											type="date"
+											value={hotelFromDate}
+											onChange={(e) => setHotelFromDate(e.target.value)}
+											className="mt-1 w-full rounded-xl border p-3"
+										/>
+									</label>
+									<label className="block text-sm">
+										Til dato
+										<input
+											type="date"
+											value={hotelToDate}
+											onChange={(e) => setHotelToDate(e.target.value)}
+											className="mt-1 w-full rounded-xl border p-3"
+										/>
+									</label>
+								</div>
+								
+								<div className="grid grid-cols-2 gap-2">
+									<label className="block text-sm">
+										Fra tid
+										<input
+											type="time"
+											value={hotelFromTime}
+											onChange={(e) => setHotelFromTime(e.target.value)}
+											className="mt-1 w-full rounded-xl border p-3"
+										/>
+									</label>
+									<label className="block text-sm">
+										Til tid
+										<input
+											type="time"
+											value={hotelToTime}
+											onChange={(e) => setHotelToTime(e.target.value)}
+											className="mt-1 w-full rounded-xl border p-3"
+										/>
+									</label>
+								</div>
+								
 								<button
-									onClick={() => setHotelOpen(false)}
-									className="rounded-xl border px-3 py-2 text-sm"
-								>
-									Lukk
-								</button>
-							</div>
-
-							<label className="block text-sm">
-								Navn
-								<input
-									value={hotelName}
-									onChange={(e) => setHotelName(e.target.value)}
-									className="mt-1 w-full rounded-xl border p-3"
-									placeholder="Fornavn Etternavn"
-								/>
-							</label>
-
-							<div className="grid grid-cols-2 gap-2">
-								<label className="block text-sm">
-									Fra dato
-									<input
-										type="date"
-										value={hotelFromDate}
-										onChange={(e) => setHotelFromDate(e.target.value)}
-										className="mt-1 w-full rounded-xl border p-3"
-									/>
-								</label>
-								<label className="block text-sm">
-									Til dato
-									<input
-										type="date"
-										value={hotelToDate}
-										onChange={(e) => setHotelToDate(e.target.value)}
-										className="mt-1 w-full rounded-xl border p-3"
-									/>
-								</label>
-							</div>
-
-							<div className="grid grid-cols-2 gap-2">
-								<label className="block text-sm">
-									Fra tid
-									<input
-										type="time"
-										value={hotelFromTime}
-										onChange={(e) => setHotelFromTime(e.target.value)}
-										className="mt-1 w-full rounded-xl border p-3"
-									/>
-								</label>
-								<label className="block text-sm">
-									Til tid
-									<input
-										type="time"
-										value={hotelToTime}
-										onChange={(e) => setHotelToTime(e.target.value)}
-										className="mt-1 w-full rounded-xl border p-3"
-									/>
-								</label>
-							</div>
-
-							<button
 									onClick={addHotelStay}
 									className="w-full rounded-xl bg-black text-white py-3 font-medium"
 								>
 									Lagre
 								</button>
-
-							{msg && <div className="rounded-xl border p-3 text-sm">{msg}</div>}
+								
+								{msg && <div className="rounded-xl border p-3 text-sm">{msg}</div>}
+							</div>
 						</div>
-					</div>
-				)}
-			</div>
-		</main>
+					)}
+				</div>
+			</AppShell>
 	);
 }

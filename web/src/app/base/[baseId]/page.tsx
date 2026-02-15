@@ -56,33 +56,15 @@ export default function BasePage() {
 
 		// Bergen / Bringeland / Kinsarvik base-sider
 		if (baseId === "bergen") {
-		return (
-			<main className="min-h-screen p-6">
-				<div className="max-w-3xl mx-auto">
-					<BergenBase />
-				</div>
-			</main>
-		);
-	}
+			return <BergenBase />;
+		}
 
 		if (baseId === "bringeland") {
-			return (
-				<main className="min-h-screen p-6">
-					<div className="max-w-3xl mx-auto">
-						<BringelandBase />
-					</div>
-				</main>
-			);
+			return <BringelandBase />;
 		}
 
 		if (baseId === "kinsarvik") {
-			return (
-				<main className="min-h-screen p-6">
-					<div className="max-w-3xl mx-auto">
-						<KinsarvikBase />
-					</div>
-				</main>
-			);
+			return <KinsarvikBase />;
 		}
 
 	const title =
