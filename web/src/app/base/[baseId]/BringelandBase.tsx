@@ -104,25 +104,38 @@ export default function BringelandBase() {
 	const [fromTime, setFromTime] = useState<string>("18:00");
 	const [toTime, setToTime] = useState<string>("18:00");
 	const [showOverview, setShowOverview] = useState(false);
-			const [calendarStart] = useState<Date>(() =>
-				startOfWeekMonday(startOfTodayLocal()),
-			);
+		const [longRoom, setLongRoom] = useState<RoomId | null>(null);
+		const [calendarStart] = useState<Date>(() =>
+			startOfWeekMonday(startOfTodayLocal()),
+		);
 
-			const calendarDays = useMemo(() => {
-				return Array.from({ length: 14 }, (_, idx) => addDays(calendarStart, idx));
-			}, [calendarStart]);
+		const calendarDays = useMemo(() => {
+			return Array.from({ length: 14 }, (_, idx) => addDays(calendarStart, idx));
+		}, [calendarStart]);
 
-			const today = startOfTodayLocal();
-			const firstWeekNumber =
-				calendarDays.length > 0 ? getIsoWeek(calendarDays[0]) : null;
-			const secondWeekNumber =
-				calendarDays.length > 7 ? getIsoWeek(calendarDays[7]) : null;
-				const weekLabel =
-					firstWeekNumber !== null
-						? secondWeekNumber !== null && secondWeekNumber !== firstWeekNumber
-							? `Uke ${firstWeekNumber}-${secondWeekNumber}`
-							: `Uke ${firstWeekNumber}`
-						: "";
+		const today = startOfTodayLocal();
+		const firstWeekNumber =
+			calendarDays.length > 0 ? getIsoWeek(calendarDays[0]) : null;
+		const secondWeekNumber =
+			calendarDays.length > 7 ? getIsoWeek(calendarDays[7]) : null;
+		const weekLabel =
+			firstWeekNumber !== null
+				? secondWeekNumber !== null && secondWeekNumber !== firstWeekNumber
+					? `Uke ${firstWeekNumber}-${secondWeekNumber}`
+					: `Uke ${firstWeekNumber}`
+				: "";
+
+		const sixMonthWeeks = useMemo(() => {
+			const WEEKS = 26; // ca. 6 måneder
+			const start = calendarStart;
+			return Array.from({ length: WEEKS }, (_, weekIndex) => {
+				const weekStart = addDays(start, weekIndex * 7);
+				const days = Array.from({ length: 7 }, (_, dayIndex) =>
+					addDays(weekStart, dayIndex),
+				);
+				return { weekStart, days };
+			});
+		}, [calendarStart]);
 
 	useEffect(() => {
 		const unsub = onAuthStateChanged(auth, async (u) => {
@@ -141,11 +154,12 @@ export default function BringelandBase() {
 
 		useEffect(() => {
 			if (!uid) return;
-		
+
 			const now = new Date();
-			const start = addDays(now, -40);
-			const end = addDays(now, 40);
-		
+			// Hent bookinger for Bringeland ca. 6 måneder tilbake og frem i tid
+			const start = addDays(now, -190);
+			const end = addDays(now, 190);
+
 			const q = query(
 				collection(db, "bookings"),
 				where("baseId", "==", "bringeland"),
@@ -295,11 +309,11 @@ export default function BringelandBase() {
 			return;
 		}
 
-		const maxTo = clampMaxOneMonth(from, to);
-		if (maxTo.getTime() !== to.getTime()) {
-			setMsg("Maks bookinglengde er 1 måned.");
-			return;
-		}
+			const maxTo = clampMaxOneMonth(from, to);
+			if (maxTo.getTime() !== to.getTime()) {
+				setMsg("Maks bookinglengde er 6 måneder.");
+				return;
+			}
 
 		const roomBookings = bookings.filter(
 			(b) => b.roomId === openRoom && b.id !== editBookingId,
@@ -701,10 +715,16 @@ export default function BringelandBase() {
 
 							return (
 								<div
-									key={room.id}
-									className="flex flex-col gap-2 px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
+								key={room.id}
+								className="flex flex-col gap-2 px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
+							>
+								<button
+									type="button"
+									onClick={() => setLongRoom(room.id)}
+									className="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-900 hover:bg-blue-100 transition-colors"
 								>
-									<div className="font-medium">{room.label}</div>
+									{room.label}
+								</button>
 									<div className="flex flex-col items-start gap-1 text-xs sm:items-end sm:text-sm">
 										<span
 											className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${statusClassName}`}
@@ -776,9 +796,79 @@ export default function BringelandBase() {
 									})}
 						</div>
 					)}
-				</section>
+					</section>
 
-				{/* BOOKING MODAL */}
+					{/* LANGTIDSKALENDER PER ROM */}
+					{longRoom && (
+						<div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+							<div className="sticky top-0 z-10 bg-white border-b px-4 py-3 flex items-center justify-between">
+								<div>
+									<div className="text-lg font-semibold">
+										{ROOMS.find((r) => r.id === longRoom)?.label} – 6 måneder
+									</div>
+									<div className="text-xs text-zinc-600">
+										Uke for uke, klikk en dag for å starte booking.
+									</div>
+								</div>
+								<button
+									type="button"
+									onClick={() => setLongRoom(null)}
+									className="rounded-xl border px-3 py-1.5 text-sm"
+								>
+									Lukk
+								</button>
+							</div>
+
+							<div className="p-4 space-y-3">
+								{sixMonthWeeks.map(({ weekStart, days }, weekIndex) => {
+									const weekNum = getIsoWeek(weekStart);
+									return (
+										<div
+											key={weekIndex}
+											className="rounded-2xl border px-3 py-2"
+										>
+											<div className="text-xs font-medium text-zinc-600 mb-2">
+												Uke {weekNum}
+											</div>
+											<div className="grid grid-cols-7 gap-1">
+												{days.map((day, dayIndex) => {
+													const occupied = isRoomOccupiedOnDate(longRoom, day);
+													const isToday =
+														day.toDateString() === today.toDateString();
+													return (
+														<button
+															key={dayIndex}
+															type="button"
+															onClick={() => {
+																setLongRoom(null);
+																openBooking(longRoom, day);
+															}}
+															className={`aspect-square rounded text-[11px] flex flex-col items-center justify-center ${
+																	occupied
+																		? "bg-red-100 text-red-800"
+																		: "bg-emerald-100 text-emerald-800"
+																} ${
+																	isToday ? "ring-2 ring-blue-500" : ""
+																} hover:opacity-80 transition`}
+														>
+															<div className="text-[10px]">
+																{formatWeekdayShort(day)}
+															</div>
+															<div className="font-semibold">
+																{day.getDate()}
+															</div>
+														</button>
+													);
+											})}
+										</div>
+									</div>
+									);
+								})}
+							</div>
+						</div>
+					)}
+
+					{/* BOOKING MODAL */}
 				{openRoom && (
 					<div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center p-4 z-50">
 						<div className="w-full max-w-lg rounded-2xl bg-white p-4 space-y-3">

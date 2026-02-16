@@ -41,8 +41,9 @@ export function getIsoWeek(date: Date): number {
 }
 
 export function clampMaxOneMonth(from: Date, to: Date): Date {
+	// Tillat maks ca. 6 måneder bookinglengde fra startdato
 	const max = new Date(from);
-	max.setMonth(max.getMonth() + 1);
+	max.setMonth(max.getMonth() + 6);
 	return to > max ? max : to;
 }
 
