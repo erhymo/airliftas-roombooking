@@ -34,18 +34,9 @@ import {
 import { formatDateInput, formatTimeInput, setTimeOnDate } from "@/lib/booking";
 import type { BergenRoomId, BookingBase } from "@/lib/types";
 
-type RoomId = BergenRoomId;
+	type RoomId = BergenRoomId;
 
-type Booking = BookingBase<"bergen", RoomId>;
-
-type HotelStay = {
-	id: string;
-	baseId: "bergen";
-	name: string;
-	from: Date;
-	to: Date;
-	createdByUid: string;
-};
+	type Booking = BookingBase<"bergen", RoomId>;
 
 const ROOMS: { id: RoomId; label: string }[] = [
 	{ id: "R1", label: "Rom 1" },
@@ -87,39 +78,27 @@ export default function BergenBase() {
 	const db = useMemo(() => firebaseDb(), []);
 	const isOnline = useOnlineStatus();
 
-	const [uid, setUid] = useState<string | null>(null);
-	const [myName, setMyName] = useState<string>("");
+		const [uid, setUid] = useState<string | null>(null);
+		const [myName, setMyName] = useState<string>("");
 
-	const [bookings, setBookings] = useState<Booking[]>([]);
-	const [hotel, setHotel] = useState<HotelStay[]>([]);
+		const [bookings, setBookings] = useState<Booking[]>([]);
 
-	const [msg, setMsg] = useState<string | null>(null);
+		const [msg, setMsg] = useState<string | null>(null);
 
 	const [openRoom, setOpenRoom] = useState<RoomId | null>(null);
 	const [editBookingId, setEditBookingId] = useState<string | null>(null);
 
 	const [step, setStep] = useState<"date" | "time">("date");
 
-	const [fromDate, setFromDate] = useState<string>(
-		formatDateInput(startOfTodayLocal()),
-	);
-	const [toDate, setToDate] = useState<string>(
-		formatDateInput(addDays(startOfTodayLocal(), 1)),
-	);
-	const [fromTime, setFromTime] = useState<string>("14:00");
-	const [toTime, setToTime] = useState<string>("14:00");
-
-	const [hotelOpen, setHotelOpen] = useState(false);
-	const [hotelName, setHotelName] = useState("");
-	const [hotelFromDate, setHotelFromDate] = useState<string>(
-		formatDateInput(startOfTodayLocal()),
-	);
-	const [hotelToDate, setHotelToDate] = useState<string>(
-		formatDateInput(addDays(startOfTodayLocal(), 1)),
-	);
-	const [hotelFromTime, setHotelFromTime] = useState<string>("14:00");
-		const [hotelToTime, setHotelToTime] = useState<string>("14:00");
-				const [showOverview, setShowOverview] = useState(false);
+		const [fromDate, setFromDate] = useState<string>(
+			formatDateInput(startOfTodayLocal()),
+		);
+		const [toDate, setToDate] = useState<string>(
+			formatDateInput(addDays(startOfTodayLocal(), 1)),
+		);
+		const [fromTime, setFromTime] = useState<string>("14:00");
+		const [toTime, setToTime] = useState<string>("14:00");
+		const [showOverview, setShowOverview] = useState(false);
 
 				const [calendarStart] = useState<Date>(() =>
 					startOfWeekMonday(startOfTodayLocal()),
@@ -200,43 +179,6 @@ export default function BergenBase() {
 					setMsg(null);
 				},
 			() => setMsg("Kunne ikke hente bookinger (sjekk Firestore Rules/indeks)."),
-		);
-
-		return () => unsub();
-	}, [db, uid]);
-
-	useEffect(() => {
-		if (!uid) return;
-
-		const q = query(
-			collection(db, "hotelStays"),
-			where("baseId", "==", "bergen"),
-			orderBy("from", "asc"),
-		);
-
-		const unsub = onSnapshot(
-			q,
-			(snap) => {
-				const rows: HotelStay[] = snap.docs.map((d) => {
-					const data = d.data() as {
-						name?: string;
-						from?: Timestamp;
-						to?: Timestamp;
-						createdByUid?: string;
-					};
-					return {
-						id: d.id,
-						baseId: "bergen",
-						name: String(data.name ?? ""),
-						from: (data.from as Timestamp).toDate(),
-						to: (data.to as Timestamp).toDate(),
-						createdByUid: String(data.createdByUid ?? ""),
-					};
-				});
-				setHotel(rows);
-					setMsg(null);
-				},
-			() => setMsg("Kunne ikke hente hotelliste (sjekk Firestore Rules/indeks)."),
 		);
 
 		return () => unsub();
@@ -402,57 +344,7 @@ export default function BergenBase() {
 		}
 	}
 
-	async function addHotelStay() {
-		if (!uid) return;
-		setMsg(null);
-
-		const fromBase = defaultBergenFrom(hotelFromDate);
-		const toBase = defaultBergenFrom(hotelToDate);
-		const from = setTimeOnDate(fromBase, hotelFromTime);
-		const to = setTimeOnDate(toBase, hotelToTime);
-
-		if (!hotelName.trim()) {
-			setMsg("Skriv inn navn for hotell.");
-			return;
-		}
-		if (to <= from) {
-			setMsg("Til må være etter fra.");
-			return;
-		}
-
-		const maxTo = clampMaxOneMonth(from, to);
-		if (maxTo.getTime() !== to.getTime()) {
-			setMsg("Maks varighet er 1 måned.");
-			return;
-		}
-
-		try {
-			await addDoc(collection(db, "hotelStays"), {
-				baseId: "bergen",
-				name: hotelName.trim(),
-				from: toTimestamp(from),
-				to: toTimestamp(to),
-				createdByUid: uid,
-				createdAt: serverTimestamp(),
-			});
-			setHotelOpen(false);
-			setHotelName("");
-		} catch {
-			setMsg("Kunne ikke lagre hotelloppføring.");
-		}
-	}
-
-	async function deleteHotelStay(id: string) {
-		if (!uid) return;
-		setMsg(null);
-		try {
-			await deleteDoc(doc(db, "hotelStays", id));
-		} catch {
-			setMsg("Kunne ikke slette hotelloppføring.");
-		}
-	}
-
-	const planRoom = (roomId: RoomId) => {
+		const planRoom = (roomId: RoomId) => {
 		const current = roomCurrentBooking(roomId);
 		const next = roomNextBooking(roomId);
 
@@ -823,56 +715,6 @@ export default function BergenBase() {
 					)}
 				</section>
 
-				<section className="rounded-2xl border p-4 space-y-3">
-					<div className="flex items-center justify-between">
-						<div className="font-semibold">Hotell (kun info)</div>
-						<button
-							onClick={() => setHotelOpen(true)}
-							className="rounded-xl border px-3 py-2 text-sm"
-						>
-							Legg til
-						</button>
-					</div>
-
-						{hotel.length === 0 ? (
-							<div className="text-sm text-zinc-900">Ingen hotelloppføringer.</div>
-						) : (
-						<div className="overflow-x-auto">
-							<table className="w-full text-sm">
-							<thead className="text-left text-zinc-900">
-									<tr>
-										<th className="py-2">Navn</th>
-										<th className="py-2">Fra</th>
-										<th className="py-2">Til</th>
-										<th className="py-2"></th>
-									</tr>
-								</thead>
-								<tbody>
-									{hotel.map((h) => (
-										<tr key={h.id} className="border-t">
-											<td className="py-2">{h.name}</td>
-											<td className="py-2">{fmt(h.from)}</td>
-											<td className="py-2">{fmt(h.to)}</td>
-											<td className="py-2 text-right">
-									{h.createdByUid === uid ? (
-										<button
-											onClick={() => deleteHotelStay(h.id)}
-											className="rounded-lg border px-2 py-1 text-xs"
-										>
-											Slett
-										</button>
-									) : (
-										<span className="text-xs text-zinc-900">—</span>
-									)}
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
-					)}
-				</section>
-
 				{/* BOOKING MODAL */}
 				{openRoom && (
 					<div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center p-4 z-50">
@@ -1000,91 +842,11 @@ export default function BergenBase() {
 								</div>
 							)}
 
-							{msg && <div className="rounded-xl border p-3 text-sm">{msg}</div>}
+						{msg && <div className="rounded-xl border p-3 text-sm">{msg}</div>}
 						</div>
 					</div>
 				)}
-					{/* HOTEL MODAL */}
-					{hotelOpen && (
-						<div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center p-4 z-50">
-							<div className="w-full max-w-lg rounded-2xl bg-white p-4 space-y-3">
-								<div className="flex items-start justify-between">
-									<div>
-										<div className="text-lg font-semibold">Legg til hotell</div>
-										<div className="text-sm text-zinc-900">Kun info til andre</div>
-									</div>
-									<button
-										onClick={() => setHotelOpen(false)}
-										className="rounded-xl border px-3 py-2 text-sm"
-									>
-										Lukk
-									</button>
-								</div>
-								
-								<label className="block text-sm">
-									Navn
-									<input
-										value={hotelName}
-										onChange={(e) => setHotelName(e.target.value)}
-										className="mt-1 w-full rounded-xl border p-3"
-										placeholder="Fornavn Etternavn"
-									/>
-								</label>
-								
-								<div className="grid grid-cols-2 gap-2">
-									<label className="block text-sm">
-										Fra dato
-										<input
-											type="date"
-											value={hotelFromDate}
-											onChange={(e) => setHotelFromDate(e.target.value)}
-											className="mt-1 w-full rounded-xl border p-3"
-										/>
-									</label>
-									<label className="block text-sm">
-										Til dato
-										<input
-											type="date"
-											value={hotelToDate}
-											onChange={(e) => setHotelToDate(e.target.value)}
-											className="mt-1 w-full rounded-xl border p-3"
-										/>
-									</label>
-								</div>
-								
-								<div className="grid grid-cols-2 gap-2">
-									<label className="block text-sm">
-										Fra tid
-										<input
-											type="time"
-											value={hotelFromTime}
-											onChange={(e) => setHotelFromTime(e.target.value)}
-											className="mt-1 w-full rounded-xl border p-3"
-										/>
-									</label>
-									<label className="block text-sm">
-										Til tid
-										<input
-											type="time"
-											value={hotelToTime}
-											onChange={(e) => setHotelToTime(e.target.value)}
-											className="mt-1 w-full rounded-xl border p-3"
-										/>
-									</label>
-								</div>
-								
-								<button
-									onClick={addHotelStay}
-									className="w-full rounded-xl bg-black text-white py-3 font-medium"
-								>
-									Lagre
-								</button>
-								
-								{msg && <div className="rounded-xl border p-3 text-sm">{msg}</div>}
-							</div>
-						</div>
-					)}
-				</div>
-			</AppShell>
+			</div>
+		</AppShell>
 	);
 }
