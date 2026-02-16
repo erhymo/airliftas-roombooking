@@ -305,32 +305,66 @@ export default function KinsarvikBase() {
 
 		const roomLabel = ROOMS.find((r) => r.id === openRoom)?.label ?? openRoom;
 
-		try {
-			if (editBookingId) {
-				await updateDoc(doc(db, "bookings", editBookingId), {
-					from: toTimestamp(from),
-					to: toTimestamp(to),
-					name: myName || "Ukjent",
-					updatedAt: serverTimestamp(),
-				});
-			} else {
-				await addDoc(collection(db, "bookings"), {
-					baseId: "kinsarvik",
-					roomId: openRoom,
-					roomName: roomLabel,
-					name: myName || "Ukjent",
-					from: toTimestamp(from),
-					to: toTimestamp(to),
-					createdByUid: uid,
-					createdByName: myName || "Ukjent",
-					createdAt: serverTimestamp(),
-					updatedAt: serverTimestamp(),
-				});
+			try {
+				if (editBookingId) {
+					await updateDoc(doc(db, "bookings", editBookingId), {
+						from: toTimestamp(from),
+						to: toTimestamp(to),
+						name: myName || "Ukjent",
+						updatedAt: serverTimestamp(),
+					});
+
+					// Optimistisk oppdatering av lokal state slik at UI endres med en gang
+					setBookings((prev) =>
+						prev
+							.map((b) =>
+								b.id === editBookingId
+									? {
+										...b,
+										from,
+										to,
+										name: myName || "Ukjent",
+									}
+								: b,
+							)
+							.sort((a, b) => a.from.getTime() - b.from.getTime()),
+					);
+				} else {
+					const docRef = await addDoc(collection(db, "bookings"), {
+						baseId: "kinsarvik",
+						roomId: openRoom,
+						roomName: roomLabel,
+						name: myName || "Ukjent",
+						from: toTimestamp(from),
+						to: toTimestamp(to),
+						createdByUid: uid,
+						createdByName: myName || "Ukjent",
+						createdAt: serverTimestamp(),
+						updatedAt: serverTimestamp(),
+					});
+
+					const newBooking: Booking = {
+						id: docRef.id,
+						baseId: "kinsarvik",
+						roomId: openRoom,
+						roomName: roomLabel,
+						name: myName || "Ukjent",
+						from,
+						to,
+						createdByUid: uid,
+						createdByName: myName || "Ukjent",
+					};
+
+					setBookings((prev) =>
+						[...prev, newBooking].sort(
+							(a, b) => a.from.getTime() - b.from.getTime(),
+						),
+					);
+				}
+				closeModal();
+			} catch {
+				setMsg("Kunne ikke lagre booking (sjekk Rules/indeks).");
 			}
-			closeModal();
-		} catch {
-			setMsg("Kunne ikke lagre booking (sjekk Rules/indeks).");
-		}
 	}
 
 		const planRoom = (roomId: RoomId) => {
