@@ -469,16 +469,20 @@ export default function BringelandBase() {
 							{ROOMS.map((room) => {
 								const firstWeek = calendarDays.slice(0, 7);
 								const secondWeek = calendarDays.slice(7, 14);
-								return (
-									<div
-										key={room.id}
-										className="space-y-1 rounded-xl border px-2 py-1"
-									>
-										<div className="flex items-center justify-between gap-2">
-											<div className="text-[11px] font-medium">
-												{room.label}
+									return (
+										<div
+											key={room.id}
+											className="space-y-1 rounded-xl border px-2 py-1"
+										>
+											<div className="flex items-center justify-between gap-2">
+												<button
+														type="button"
+														onClick={() => setLongRoom(room.id)}
+														className="inline-flex items-center rounded-lg border border-sky-200 bg-sky-50 px-2 py-1 text-[11px] font-medium text-sky-900 hover:bg-sky-100 transition-colors"
+												>
+													{room.label}
+												</button>
 											</div>
-										</div>
 										<div className="space-y-1">
 											<div className="grid grid-cols-7 gap-1">
 												{firstWeek.map((day) => {
