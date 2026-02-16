@@ -56,34 +56,41 @@ export default function BasesPage() {
 
 	return (
 		<main className="min-h-screen bg-zinc-50 p-6 text-zinc-900">
-			<div className="mx-auto flex max-w-3xl flex-col gap-6">
-				<header className="space-y-1">
+				<div className="mx-auto flex max-w-3xl flex-col gap-6">
+					<div className="flex justify-center">
+						<img
+							src="https://images.squarespace-cdn.com/content/v1/538c76b6e4b0766b4d3cb456/1459857868107-9IPO4KON0JG63MVNF6DG/Airlift_logo_rgb.png"
+							alt="Airlift"
+							className="h-8 w-auto"
+						/>
+					</div>
+					<header className="space-y-1">
 					<h1 className="text-2xl font-semibold">Velg base</h1>
 					<p className="text-sm text-zinc-800">
 						Velg hvilken base du vil se rombooking for.
 					</p>
 				</header>
 
-				<div className="grid gap-3 sm:grid-cols-3">
-					{BASES.map((b) => (
-						<button
-							key={b.id}
-								onClick={() => router.push(`/base/${b.id}`)}
-							className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium hover:bg-zinc-50"
-						>
-							{b.name}
-						</button>
-					))}
-				</div>
+					<div className="grid gap-3 sm:grid-cols-3">
+						{BASES.map((b) => (
+							<button
+								key={b.id}
+									onClick={() => router.push(`/base/${b.id}`)}
+								className="rounded-xl border border-sky-200 bg-white px-4 py-3 text-sm font-medium text-sky-900 hover:bg-sky-50"
+							>
+								{b.name}
+							</button>
+						))}
+					</div>
 
-				<div className="flex justify-end">
-					<button
-						onClick={() => router.push("/admin")}
-						className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium hover:bg-zinc-50"
-					>
-						Til admin
-					</button>
-				</div>
+					<div className="flex justify-end">
+						<button
+							onClick={() => router.push("/admin")}
+							className="rounded-xl border border-sky-200 bg-white px-4 py-2 text-sm font-medium text-sky-900 hover:bg-sky-50"
+						>
+							Til admin
+						</button>
+					</div>
 			</div>
 		</main>
 	);

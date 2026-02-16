@@ -68,10 +68,17 @@ export default function HomePage() {
 		}
 	}
 
-	return (
-		<main className="min-h-screen bg-zinc-50 p-6 text-zinc-900">
-			<div className="mx-auto flex max-w-4xl flex-col gap-8">
-				<header className="space-y-2">
+		return (
+			<main className="min-h-screen bg-zinc-50 p-6 text-zinc-900">
+				<div className="mx-auto flex max-w-4xl flex-col gap-8">
+					<div className="flex justify-center">
+						<img
+							src="https://images.squarespace-cdn.com/content/v1/538c76b6e4b0766b4d3cb456/1459857868107-9IPO4KON0JG63MVNF6DG/Airlift_logo_rgb.png"
+							alt="Airlift"
+							className="h-10 w-auto"
+						/>
+					</div>
+					<header className="space-y-2">
 					<h1 className="text-2xl font-semibold">Airliftas – PIN-innlogging</h1>
 					<p className="text-base font-normal leading-relaxed text-zinc-900">
 						Logg inn med PIN. Har du ikke bruker ennå, kan du opprette ny bruker via
@@ -105,7 +112,7 @@ export default function HomePage() {
 								/>
 							</div>
 							<button
-								className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+								className="rounded-xl bg-sky-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60 hover:bg-sky-800"
 								type="submit"
 								disabled={busyLogin}
 							>

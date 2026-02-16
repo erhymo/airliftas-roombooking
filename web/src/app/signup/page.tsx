@@ -105,7 +105,7 @@ export default function SignupPage() {
 						<button
 							type="submit"
 							disabled={busyCreate}
-							className="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+							className="rounded-xl bg-sky-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60 hover:bg-sky-800"
 						>
 							{busyCreate ? "Sender…" : "Send forespørsel"}
 						</button>

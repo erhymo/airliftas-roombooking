@@ -347,7 +347,7 @@ export default function AdminPage() {
 							</div>
 							<button
 								type="submit"
-								className="w-full rounded-xl bg-black px-4 py-2 text-sm font-medium text-white"
+								className="w-full rounded-xl bg-sky-900 px-4 py-2 text-sm font-medium text-white hover:bg-sky-800"
 							>
 								Logg inn
 							</button>
@@ -459,7 +459,7 @@ export default function AdminPage() {
 									<button
 										onClick={() => handleApprove(r.id)}
 										disabled={busyApproveId === r.id || busyDeleteId === r.id}
-										className="rounded-xl bg-black text-white px-3 py-2 text-sm"
+										className="rounded-xl bg-sky-900 text-white px-3 py-2 text-sm hover:bg-sky-800"
 									>
 										{busyApproveId === r.id
 													? "Godkjenner…"

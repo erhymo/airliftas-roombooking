@@ -32,10 +32,17 @@ export default function HomeAppPage() {
     );
   }
 
-  return (
-    <main className="min-h-screen bg-zinc-50 p-6 text-zinc-900">
-      <div className="mx-auto flex max-w-4xl flex-col gap-8">
-        <header className="space-y-2">
+	  return (
+	    <main className="min-h-screen bg-zinc-50 p-6 text-zinc-900">
+	      <div className="mx-auto flex max-w-4xl flex-col gap-8">
+	        <div className="flex justify-center">
+	          <img
+	            src="https://images.squarespace-cdn.com/content/v1/538c76b6e4b0766b4d3cb456/1459857868107-9IPO4KON0JG63MVNF6DG/Airlift_logo_rgb.png"
+	            alt="Airlift"
+	            className="h-8 w-auto"
+	          />
+	        </div>
+	        <header className="space-y-2">
           <h1 className="text-2xl font-semibold">Velg hva du vil gjøre</h1>
           <p className="text-sm leading-relaxed text-zinc-900">
             Etter innlogging kan du her velge funksjon. Foreløpig finnes bare

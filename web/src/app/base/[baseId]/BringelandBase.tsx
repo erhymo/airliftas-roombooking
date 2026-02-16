@@ -492,7 +492,7 @@ export default function BringelandBase() {
 																(occupied
 																	? "bg-red-100 text-red-800"
 																	: "bg-emerald-100 text-emerald-800") +
-																(isToday ? " ring-2 ring-blue-500" : "")
+											(isToday ? " ring-2 ring-sky-900" : "")
 															}
 															onClick={() => openBooking(room.id, day)}
 															title={`${formatWeekdayShort(day)} ${day.toLocaleDateString("nb-NO")}`}
@@ -515,7 +515,7 @@ export default function BringelandBase() {
 																(occupied
 																	? "bg-red-100 text-red-800"
 																	: "bg-emerald-100 text-emerald-800") +
-																(isToday ? " ring-2 ring-blue-500" : "")
+											(isToday ? " ring-2 ring-sky-900" : "")
 															}
 															onClick={() => openBooking(room.id, day)}
 															title={`${formatWeekdayShort(day)} ${day.toLocaleDateString("nb-NO")}`}
@@ -721,7 +721,7 @@ export default function BringelandBase() {
 								<button
 									type="button"
 									onClick={() => setLongRoom(room.id)}
-									className="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-900 hover:bg-blue-100 transition-colors"
+									className="inline-flex items-center rounded-lg border border-sky-200 bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-900 hover:bg-sky-100 transition-colors"
 								>
 									{room.label}
 								</button>
@@ -843,13 +843,13 @@ export default function BringelandBase() {
 																setLongRoom(null);
 																openBooking(longRoom, day);
 															}}
-															className={`aspect-square rounded text-[11px] flex flex-col items-center justify-center ${
-																	occupied
-																		? "bg-red-100 text-red-800"
-																		: "bg-emerald-100 text-emerald-800"
-																} ${
-																	isToday ? "ring-2 ring-blue-500" : ""
-																} hover:opacity-80 transition`}
+									className={`aspect-square rounded text-[11px] flex flex-col items-center justify-center ${
+										occupied
+											? "bg-red-100 text-red-800"
+											: "bg-emerald-100 text-emerald-800"
+									} ${
+										isToday ? "ring-2 ring-sky-900" : ""
+									} hover:opacity-80 transition`}
 														>
 															<div className="text-[10px]">
 																{formatWeekdayShort(day)}
@@ -972,7 +972,7 @@ export default function BringelandBase() {
 											</button>
 											<button
 												onClick={saveBooking}
-												className="flex-1 rounded-xl bg-black text-white py-3 font-medium"
+									className="flex-1 rounded-xl bg-sky-900 text-white py-3 font-medium hover:bg-sky-800"
 											>
 												Lagre
 											</button>
