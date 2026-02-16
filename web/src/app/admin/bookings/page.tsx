@@ -18,6 +18,16 @@ import {
 
 import { firebaseAuth, firebaseDb } from "@/lib/firebaseClient";
 import { isSessionExpired } from "@/lib/session";
+import {
+	startOfTodayLocal,
+	addDays,
+	startOfWeekMonday,
+	formatWeekdayShort,
+	getIsoWeek,
+	overlaps,
+} from "@/lib/calendar";
+import { formatDateInput, formatTimeInput, combineDateTime } from "@/lib/booking";
+import type { BaseId } from "@/lib/types";
 
 type UserDoc = {
 	name?: string;
@@ -49,9 +59,7 @@ type BookingRow = {
 	createdByName: string;
 };
 
-	type BaseId = "bergen" | "bringeland" | "kinsarvik";
-
-	const BASE_LABELS: Record<BaseId, string> = {
+		const BASE_LABELS: Record<BaseId, string> = {
 		bergen: "Bergen",
 		bringeland: "Bringeland",
 		kinsarvik: "Kinsarvik",
@@ -100,73 +108,7 @@ function fmt(d: Date) {
 	}).format(d);
 }
 
-function formatDateInput(d: Date): string {
-	return d.toISOString().slice(0, 10);
-}
-
-function formatTimeInput(d: Date): string {
-	return d.toISOString().slice(11, 16);
-}
-
-function combineDateTime(dateStr: string, timeStr: string): Date | null {
-	if (!dateStr) return null;
-	const [yearStr, monthStr, dayStr] = dateStr.split("-");
-	const [hourStr, minuteStr] = (timeStr || "").split(":");
-	const year = Number(yearStr);
-	const month = Number(monthStr);
-	const day = Number(dayStr);
-	const hour = Number(hourStr || "0");
-	const minute = Number(minuteStr || "0");
-	if (!year || !month || !day) return null;
-	const d = new Date();
-	d.setFullYear(year, month - 1, day);
-	d.setHours(hour, minute, 0, 0);
-	return d;
-}
-
-	function startOfTodayLocal() {
-		const d = new Date();
-		d.setHours(0, 0, 0, 0);
-		return d;
-	}
-
-	function addDays(d: Date, days: number) {
-		const x = new Date(d);
-		x.setDate(x.getDate() + days);
-		return x;
-	}
-
-	function startOfWeekMonday(d: Date) {
-		const x = new Date(d);
-		x.setHours(0, 0, 0, 0);
-		const day = x.getDay(); // 0 = søndag, 1 = mandag, ...
-		const diff = (day + 6) % 7; // antall dager tilbake til mandag
-		return addDays(x, -diff);
-	}
-
-	function formatWeekdayShort(d: Date) {
-		return new Intl.DateTimeFormat("nb-NO", { weekday: "short" })
-			.format(d)
-			.replace(".", "");
-	}
-
-	function getIsoWeek(date: Date): number {
-		const d = new Date(
-			Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
-		);
-		const dayNum = d.getUTCDay() || 7;
-		// Sett dato til torsdag i denne uken
-		d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-		const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-		const weekNo = Math.ceil(
-			((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7,
-		);
-		return weekNo;
-	}
-
-	function overlaps(aFrom: Date, aTo: Date, bFrom: Date, bTo: Date) {
-		return aFrom < bTo && aTo > bFrom;
-	}
+// Date/time helpers are imported from @/lib/booking
 
 export default function AdminBookingsPage() {
 	const router = useRouter();

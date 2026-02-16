@@ -19,23 +19,24 @@ import {
 	where,
 } from "firebase/firestore";
 
-	import { firebaseAuth, firebaseDb } from "@/lib/firebaseClient";
-		import { isSessionExpired } from "@/lib/session";
-		import { useOnlineStatus } from "@/lib/useOnlineStatus";
+import { firebaseAuth, firebaseDb } from "@/lib/firebaseClient";
+import { isSessionExpired } from "@/lib/session";
+import { useOnlineStatus } from "@/lib/useOnlineStatus";
+import {
+	startOfTodayLocal,
+	addDays,
+	startOfWeekMonday,
+	formatWeekdayShort,
+	getIsoWeek,
+	clampMaxOneMonth,
+	overlaps,
+} from "@/lib/calendar";
+import { formatDateInput, formatTimeInput, setTimeOnDate } from "@/lib/booking";
+import type { BergenRoomId, BookingBase } from "@/lib/types";
 
-type RoomId = "R1" | "R2" | "R3" | "R4" | "R5" | "R6";
+type RoomId = BergenRoomId;
 
-type Booking = {
-	id: string;
-	baseId: "bergen";
-	roomId: RoomId;
-	roomName: string;
-	name: string;
-	from: Date;
-	to: Date;
-	createdByUid: string;
-	createdByName: string;
-};
+type Booking = BookingBase<"bergen", RoomId>;
 
 type HotelStay = {
 	id: string;
@@ -68,57 +69,6 @@ function fmt(dt: Date) {
 function toTimestamp(d: Date) {
 	return Timestamp.fromDate(d);
 }
-
-function startOfTodayLocal() {
-	const d = new Date();
-	d.setHours(0, 0, 0, 0);
-	return d;
-}
-
-function addDays(d: Date, days: number) {
-	const x = new Date(d);
-	x.setDate(x.getDate() + days);
-	return x;
-}
-
-	function startOfWeekMonday(d: Date) {
-		const x = new Date(d);
-		x.setHours(0, 0, 0, 0);
-		const day = x.getDay(); // 0 = søndag, 1 = mandag, ...
-		const diff = (day + 6) % 7; // antall dager tilbake til mandag
-		return addDays(x, -diff);
-	}
-
-	function formatWeekdayShort(d: Date) {
-		return new Intl.DateTimeFormat("nb-NO", { weekday: "short" })
-			.format(d)
-			.replace(".", "");
-	}
-
-	function getIsoWeek(date: Date): number {
-		const d = new Date(
-			Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
-		);
-		const dayNum = d.getUTCDay() || 7;
-		// Sett dato til torsdag i denne uken
-		d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-		const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-		const weekNo = Math.ceil(
-			((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7,
-		);
-		return weekNo;
-	}
-
-function clampMaxOneMonth(from: Date, to: Date) {
-	const max = new Date(from);
-	max.setMonth(max.getMonth() + 1);
-	return to > max ? max : to;
-}
-
-function overlaps(aFrom: Date, aTo: Date, bFrom: Date, bTo: Date) {
-	return aFrom < bTo && aTo > bFrom;
-}
-
 function defaultBergenFrom(dateStr: string) {
 	const [y, m, d] = dateStr.split("-").map(Number);
 	const dt = new Date(y, m - 1, d, 14, 0, 0, 0);
@@ -129,26 +79,6 @@ function defaultBergenTo(dateStr: string) {
 	const from = defaultBergenFrom(dateStr);
 	const to = addDays(from, 1);
 	return to;
-}
-
-function formatDateInput(d: Date) {
-	const yyyy = d.getFullYear();
-	const mm = String(d.getMonth() + 1).padStart(2, "0");
-	const dd = String(d.getDate()).padStart(2, "0");
-	return `${yyyy}-${mm}-${dd}`;
-}
-
-function formatTimeInput(d: Date) {
-	const hh = String(d.getHours()).padStart(2, "0");
-	const mm = String(d.getMinutes()).padStart(2, "0");
-	return `${hh}:${mm}`;
-}
-
-function setTimeOnDate(date: Date, hhmm: string) {
-	const [hh, mm] = hhmm.split(":").map(Number);
-	const d = new Date(date);
-	d.setHours(hh, mm, 0, 0);
-	return d;
 }
 
 export default function BergenBase() {
