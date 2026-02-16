@@ -136,15 +136,15 @@ export default function KinsarvikBase() {
 		if (!uid) return;
 
 		const now = new Date();
-		const start = addDays(now, -2);
-		const end = addDays(now, 40);
+			const start = addDays(now, -40);
+			const end = addDays(now, 40);
 
 		const q = query(
 			collection(db, "bookings"),
 			where("baseId", "==", "kinsarvik"),
-			where("to", ">", toTimestamp(start)),
-			where("from", "<", toTimestamp(end)),
-			orderBy("to", "asc"),
+				where("from", ">", toTimestamp(start)),
+				where("from", "<", toTimestamp(end)),
+				orderBy("from", "asc"),
 		);
 
 		const unsub = onSnapshot(
@@ -173,7 +173,8 @@ export default function KinsarvikBase() {
 					};
 				});
 				setBookings(rows);
-			},
+					setMsg(null);
+				},
 			() => setMsg("Kunne ikke hente bookinger (sjekk Firestore Rules/indeks)."),
 		);
 

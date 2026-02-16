@@ -160,15 +160,15 @@ export default function BergenBase() {
 		if (!uid) return;
 
 		const now = new Date();
-		const start = addDays(now, -2);
-		const end = addDays(now, 40);
+			const start = addDays(now, -40);
+			const end = addDays(now, 40);
 
 		const q = query(
 			collection(db, "bookings"),
 			where("baseId", "==", "bergen"),
-			where("to", ">", toTimestamp(start)),
-			where("from", "<", toTimestamp(end)),
-			orderBy("to", "asc"),
+				where("from", ">", toTimestamp(start)),
+				where("from", "<", toTimestamp(end)),
+				orderBy("from", "asc"),
 		);
 
 		const unsub = onSnapshot(
@@ -197,7 +197,8 @@ export default function BergenBase() {
 					};
 				});
 				setBookings(rows);
-			},
+					setMsg(null);
+				},
 			() => setMsg("Kunne ikke hente bookinger (sjekk Firestore Rules/indeks)."),
 		);
 
@@ -233,7 +234,8 @@ export default function BergenBase() {
 					};
 				});
 				setHotel(rows);
-			},
+					setMsg(null);
+				},
 			() => setMsg("Kunne ikke hente hotelliste (sjekk Firestore Rules/indeks)."),
 		);
 

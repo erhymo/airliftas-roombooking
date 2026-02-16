@@ -139,50 +139,51 @@ export default function BringelandBase() {
 		return () => unsub();
 	}, [auth, db, router]);
 
-	useEffect(() => {
-		if (!uid) return;
+		useEffect(() => {
+			if (!uid) return;
+		
+			const now = new Date();
+			const start = addDays(now, -40);
+			const end = addDays(now, 40);
+		
+			const q = query(
+				collection(db, "bookings"),
+				where("baseId", "==", "bringeland"),
+				where("from", ">", toTimestamp(start)),
+				where("from", "<", toTimestamp(end)),
+				orderBy("from", "asc"),
+			);
 
-		const now = new Date();
-		const start = addDays(now, -2);
-		const end = addDays(now, 40);
-
-		const q = query(
-			collection(db, "bookings"),
-			where("baseId", "==", "bringeland"),
-			where("to", ">", toTimestamp(start)),
-			where("from", "<", toTimestamp(end)),
-			orderBy("to", "asc"),
-		);
-
-		const unsub = onSnapshot(
-			q,
-			(snap) => {
-				const rows: Booking[] = snap.docs.map((d) => {
-					const data = d.data() as {
-						roomId?: RoomId;
-						roomName?: string;
-						name?: string;
-						from?: Timestamp;
-						to?: Timestamp;
-						createdByUid?: string;
-						createdByName?: string;
-					};
-					return {
-						id: d.id,
-						baseId: "bringeland",
-						roomId: (data.roomId ?? "R1") as RoomId,
-						roomName: String(data.roomName ?? ""),
-						name: String(data.name ?? ""),
-						from: (data.from as Timestamp).toDate(),
-						to: (data.to as Timestamp).toDate(),
-						createdByUid: String(data.createdByUid ?? ""),
-						createdByName: String(data.createdByName ?? ""),
-					};
-				});
-				setBookings(rows);
-			},
-			() => setMsg("Kunne ikke hente bookinger (sjekk Firestore Rules/indeks)."),
-		);
+			const unsub = onSnapshot(
+				q,
+				(snap) => {
+					const rows: Booking[] = snap.docs.map((d) => {
+						const data = d.data() as {
+							roomId?: RoomId;
+							roomName?: string;
+							name?: string;
+							from?: Timestamp;
+							to?: Timestamp;
+							createdByUid?: string;
+							createdByName?: string;
+						};
+						return {
+							id: d.id,
+							baseId: "bringeland",
+							roomId: (data.roomId ?? "R1") as RoomId,
+							roomName: String(data.roomName ?? ""),
+							name: String(data.name ?? ""),
+							from: (data.from as Timestamp).toDate(),
+							to: (data.to as Timestamp).toDate(),
+							createdByUid: String(data.createdByUid ?? ""),
+							createdByName: String(data.createdByName ?? ""),
+						};
+					});
+					setBookings(rows);
+					setMsg(null);
+				},
+				() => setMsg("Kunne ikke hente bookinger (sjekk Firestore Rules/indeks)."),
+			);
 
 		return () => unsub();
 	}, [db, uid]);
