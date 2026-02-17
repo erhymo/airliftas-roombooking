@@ -318,19 +318,41 @@ export default function AdminPage() {
 		}
 
 		setBusyDeleteUserUid(user.uid);
+		let deleted = false;
 		try {
 			await fnAdminDeleteUser(user.uid);
+			deleted = true;
+			// Oppdater lokalt UI med en gang slik at raden forsvinner,
+			// selv om en senere refresh fra backend skulle feile.
+			setUsers((prev) => prev.filter((u) => u.uid !== user.uid));
 			setMsg("Bruker slettet.");
-			await loadUsersWithPins();
 		} catch (error: unknown) {
 			if (error instanceof Error && error.message) {
+				// Firebase Functions-feil har ofte prefix som "INTERNAL: ".
 				const cleaned = error.message.replace(/^.*?:\s*/, "");
-				setMsg(cleaned || "Kunne ikke slette bruker.");
+				const upper = cleaned.trim().toUpperCase();
+				if (upper === "INTERNAL") {
+					setMsg(
+						"Kunne ikke slette bruker (teknisk feil). Prøv igjen eller kontakt utvikler.",
+					);
+				} else {
+					setMsg(cleaned || "Kunne ikke slette bruker.");
+				}
 			} else {
 				setMsg("Kunne ikke slette bruker. Sjekk admin-rettigheter.");
 			}
 		} finally {
 			setBusyDeleteUserUid(null);
+		}
+
+		// Prøv å oppdatere lista fra backend, men ikke la en eventuell feil her
+		// overstyre hovedmeldingen om at brukeren ble slettet.
+		if (deleted) {
+			try {
+				await loadUsersWithPins();
+			} catch {
+				// Ignorer feil her; viktigst er at slettingen har gått gjennom.
+			}
 		}
 	}
 
