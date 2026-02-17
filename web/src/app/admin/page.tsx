@@ -254,8 +254,15 @@ export default function AdminPage() {
 				await loadPending();
 				// Brukerlista endres (ny user), så refresh den også:
 				await loadUsersWithPins();
-			} catch {
-				setMsg("Kunne ikke godkjenne. Sjekk admin-rettigheter.");
+				} catch (error: unknown) {
+					// Vis faktisk feilmelding fra backend der det er mulig (f.eks. PIN-kollisjon eller manglende admin).
+					if (error instanceof Error && error.message) {
+						// Firebase Functions-feil har ofte prefix som "functions/permission-denied: ".
+						const cleaned = error.message.replace(/^.*?:\s*/, "");
+						setMsg(cleaned || "Kunne ikke godkjenne forespørselen.");
+					} else {
+						setMsg("Kunne ikke godkjenne forespørselen. Sjekk admin-rettigheter.");
+					}
 			} finally {
 				setBusyApproveId(null);
 			}
