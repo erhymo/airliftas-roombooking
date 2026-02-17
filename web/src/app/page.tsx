@@ -79,13 +79,12 @@ export default function HomePage() {
 						/>
 					</div>
 					<header className="space-y-2">
-					<h1 className="text-2xl font-semibold">Airliftas – PIN-innlogging</h1>
-					<p className="text-base font-normal leading-relaxed text-zinc-900">
-						Logg inn med PIN. Har du ikke bruker ennå, kan du opprette ny bruker via
-						lenken under.
-						 Admin-grensesnittet finner du på <code>/admin</code>.
-					</p>
-				</header>
+						<h1 className="text-2xl font-semibold">PIN-innlogging</h1>
+						<p className="text-base font-normal leading-relaxed text-zinc-900">
+							Logg inn med PIN. Har du ikke bruker ennå, kan du opprette ny bruker via
+							lenken under.
+						</p>
+					</header>
 
 				{msg && (
 					<div className="rounded-xl border border-zinc-200 bg-white p-3 text-sm">
