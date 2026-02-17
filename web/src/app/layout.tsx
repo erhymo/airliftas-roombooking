@@ -12,15 +12,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-	title: "Airlift",
-	description: "Rombooking for Airlift",
-	applicationName: "Airlift",
-	icons: {
-		icon: "/icon.svg",
-		apple: "/icon.svg",
-	},
-};
+	export const metadata: Metadata = {
+		title: "Airlift",
+		description: "Rombooking for Airlift",
+		applicationName: "Airlift",
+		icons: {
+			icon: "/airlift-icon-192.png",
+			apple: "/airlift-icon-192.png",
+		},
+	};
 
 export default function RootLayout({
   children,
