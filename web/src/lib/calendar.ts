@@ -26,6 +26,13 @@ export function formatWeekdayShort(d: Date): string {
 		.replace(".", "");
 }
 
+	export function formatMonthShort(d: Date): string {
+		const short = new Intl.DateTimeFormat("nb-NO", { month: "short" })
+			.format(d)
+			.replace(".", "");
+		return short.charAt(0).toUpperCase() + short.slice(1);
+	}
+
 export function getIsoWeek(date: Date): number {
 	const d = new Date(
 		Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),

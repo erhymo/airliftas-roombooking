@@ -27,6 +27,7 @@ import {
 	addDays,
 	startOfWeekMonday,
 	formatWeekdayShort,
+		formatMonthShort,
 	getIsoWeek,
 	clampMaxOneMonth,
 	overlaps,
@@ -246,6 +247,29 @@ export default function BringelandBase() {
 					b.roomId === roomId && overlaps(b.from, b.to, dayStart, dayEnd),
 			);
 		}
+
+			function getLastNameFromFullName(fullName: string): string {
+				const trimmed = fullName.trim();
+				if (!trimmed) return "";
+				const parts = trimmed.split(" ");
+				return parts[parts.length - 1];
+			}
+
+			function myLastNameOnDate(roomId: RoomId, day: Date): string {
+				if (!uid) return "";
+				const dayStart = new Date(day);
+				dayStart.setHours(0, 0, 0, 0);
+				const dayEnd = addDays(dayStart, 1);
+				const mine = bookings.find(
+					(b) =>
+						b.roomId === roomId &&
+						b.createdByUid === uid &&
+						overlaps(b.from, b.to, dayStart, dayEnd),
+				);
+				if (!mine) return "";
+				const sourceName = mine.createdByName || myName || "";
+				return getLastNameFromFullName(sourceName);
+			}
 
 		function openBooking(roomId: RoomId, day?: Date) {
 			setMsg(null);
@@ -488,21 +512,30 @@ export default function BringelandBase() {
 												{firstWeek.map((day) => {
 													const occupied = isRoomOccupiedOnDate(room.id, day);
 													const isToday = day.getTime() === today.getTime();
+															const myLastName = myLastNameOnDate(room.id, day);
 													return (
 														<div
 															key={day.toISOString()}
-															className={
-																"flex h-7 flex-col items-center justify-center rounded text-[10px] cursor-pointer " +
+																	className={
+																		"flex h-12 flex-col items-center justify-center rounded text-[10px] cursor-pointer " +
 																(occupied
 																	? "bg-red-100 text-red-800"
 																	: "bg-emerald-100 text-emerald-800") +
 											(isToday ? " ring-2 ring-sky-900" : "")
 															}
 															onClick={() => openBooking(room.id, day)}
-															title={`${formatWeekdayShort(day)} ${day.toLocaleDateString("nb-NO")}`}
-														>
-															<div>{formatWeekdayShort(day)}</div>
-															<div>{day.getDate()}</div>
+																	title={`${formatWeekdayShort(day)} ${day.toLocaleDateString("nb-NO")}`}
+																>
+																	<div className="leading-tight text-center">
+																		<div>{formatWeekdayShort(day)}</div>
+																		<div>{day.getDate()}</div>
+																		<div>{formatMonthShort(day)}</div>
+																		{myLastName && (
+																			<div className="text-[9px] font-semibold truncate max-w-full">
+																				{myLastName}
+																			</div>
+																		)}
+																	</div>
 														</div>
 													);
 												})}
@@ -511,21 +544,30 @@ export default function BringelandBase() {
 												{secondWeek.map((day) => {
 													const occupied = isRoomOccupiedOnDate(room.id, day);
 													const isToday = day.getTime() === today.getTime();
+															const myLastName = myLastNameOnDate(room.id, day);
 													return (
 														<div
 															key={day.toISOString()}
-															className={
-																"flex h-7 flex-col items-center justify-center rounded text-[10px] cursor-pointer " +
+																	className={
+																		"flex h-12 flex-col items-center justify-center rounded text-[10px] cursor-pointer " +
 																(occupied
 																	? "bg-red-100 text-red-800"
 																	: "bg-emerald-100 text-emerald-800") +
 											(isToday ? " ring-2 ring-sky-900" : "")
 															}
 															onClick={() => openBooking(room.id, day)}
-															title={`${formatWeekdayShort(day)} ${day.toLocaleDateString("nb-NO")}`}
-														>
-															<div>{formatWeekdayShort(day)}</div>
-															<div>{day.getDate()}</div>
+																	title={`${formatWeekdayShort(day)} ${day.toLocaleDateString("nb-NO")}`}
+																>
+																	<div className="leading-tight text-center">
+																		<div>{formatWeekdayShort(day)}</div>
+																		<div>{day.getDate()}</div>
+																		<div>{formatMonthShort(day)}</div>
+																		{myLastName && (
+																			<div className="text-[9px] font-semibold truncate max-w-full">
+																				{myLastName}
+																			</div>
+																		)}
+																	</div>
 														</div>
 													);
 												})}
@@ -838,7 +880,8 @@ export default function BringelandBase() {
 												{days.map((day, dayIndex) => {
 													const occupied = isRoomOccupiedOnDate(longRoom, day);
 													const isToday =
-														day.toDateString() === today.toDateString();
+																	day.toDateString() === today.toDateString();
+																const myLastName = myLastNameOnDate(longRoom, day);
 													return (
 													<button
 														key={dayIndex}
@@ -846,20 +889,28 @@ export default function BringelandBase() {
 														onClick={() => {
 															openBooking(longRoom, day);
 														}}
-									className={`aspect-square rounded text-[11px] flex flex-col items-center justify-center ${
-										occupied
-											? "bg-red-100 text-red-800"
-											: "bg-emerald-100 text-emerald-800"
-									} ${
-										isToday ? "ring-2 ring-sky-900" : ""
-									} hover:opacity-80 transition`}
-														>
-															<div className="text-[10px]">
-																{formatWeekdayShort(day)}
-															</div>
-															<div className="font-semibold">
-																{day.getDate()}
-															</div>
+																		className={`aspect-square rounded text-[11px] flex flex-col items-center justify-center ${
+																			occupied
+																				? "bg-red-100 text-red-800"
+																				: "bg-emerald-100 text-emerald-800"
+																		} ${
+																			isToday ? "ring-2 ring-sky-900" : ""
+																		} hover:opacity-80 transition`}
+																	>
+																		<div className="leading-tight text-center">
+																			<div className="text-[10px]">
+																				{formatWeekdayShort(day)}
+																			</div>
+																			<div className="font-semibold">
+																				{day.getDate()}
+																			</div>
+																			<div>{formatMonthShort(day)}</div>
+																			{myLastName && (
+																				<div className="text-[9px] font-semibold truncate max-w-full">
+																					{myLastName}
+																				</div>
+																			)}
+																		</div>
 														</button>
 													);
 											})}
