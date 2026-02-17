@@ -83,14 +83,20 @@ export default function BasesPage() {
 						))}
 					</div>
 
-					<div className="flex justify-end">
-						<button
-							onClick={() => router.push("/admin")}
-							className="rounded-xl border border-sky-200 bg-white px-4 py-2 text-sm font-medium text-sky-900 hover:bg-sky-50"
-						>
-							Til admin
-						</button>
-					</div>
+						<div className="flex items-center justify-between">
+							<button
+								onClick={() => router.push("/home")}
+								className="rounded-xl border border-sky-200 bg-white px-4 py-2 text-sm font-medium text-sky-900 hover:bg-sky-50"
+							>
+								Tilbake til forside
+							</button>
+							<button
+								onClick={() => router.push("/admin")}
+								className="rounded-xl border border-sky-200 bg-white px-4 py-2 text-sm font-medium text-sky-900 hover:bg-sky-50"
+							>
+								Til admin
+							</button>
+						</div>
 			</div>
 		</main>
 	);
