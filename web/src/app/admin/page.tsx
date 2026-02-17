@@ -27,9 +27,10 @@ import {
 		fnAdminChangePin,
 			fnAdminListUsersWithPins,
 			type AdminUserWithPin,
-	} from "@/lib/functions";
+		} from "@/lib/functions";
+import { fnAdminDeleteUser } from "@/lib/functions";
 
-const HARD_CODED_ADMIN_EMAIL = "oyvind.myhre@airlift.no";
+		const HARD_CODED_ADMIN_EMAIL = "oyvind.myhre@airlift.no";
 
 	type PendingRequest = {
 	id: string;
@@ -88,11 +89,13 @@ export default function AdminPage() {
 		const [refreshingPending, setRefreshingPending] = useState(false);
 		const [refreshingUsers, setRefreshingUsers] = useState(false);
 
-		const [pinEdits, setPinEdits] = useState<Record<string, string>>({}); // uid -> newPin
-		const [busyPinUid, setBusyPinUid] = useState<string | null>(null);
-		const [busyApproveId, setBusyApproveId] = useState<string | null>(null);
-		const [busyDeleteId, setBusyDeleteId] = useState<string | null>(null);
-
+			const [pinEdits, setPinEdits] = useState<Record<string, string>>({}); // uid -> newPin
+			const [busyPinUid, setBusyPinUid] = useState<string | null>(null);
+			const [busyApproveId, setBusyApproveId] = useState<string | null>(null);
+			const [busyDeleteId, setBusyDeleteId] = useState<string | null>(null);
+			const [busyDeleteUserUid, setBusyDeleteUserUid] =
+				useState<string | null>(null);
+		
 			// --------------- auth gate + admin check ---------------
 		// TODO (manuelt steg i Firebase Console/Firestore):
 		// Sørg for at minst én bruker har et dokument users/{uid} med
@@ -301,6 +304,33 @@ export default function AdminPage() {
 			setMsg("Pinkode ikke godkjent – prøv en ny.");
 		} finally {
 			setBusyPinUid(null);
+		}
+	}
+
+	async function handleDeleteUser(user: AdminUserRow) {
+		setMsg(null);
+		const label = user.name || "denne brukeren";
+		if (
+			typeof window !== "undefined" &&
+			!window.confirm(`Er du sikker på at du vil slette ${label}?`)
+		) {
+			return;
+		}
+
+		setBusyDeleteUserUid(user.uid);
+		try {
+			await fnAdminDeleteUser(user.uid);
+			setMsg("Bruker slettet.");
+			await loadUsersWithPins();
+		} catch (error: unknown) {
+			if (error instanceof Error && error.message) {
+				const cleaned = error.message.replace(/^.*?:\s*/, "");
+				setMsg(cleaned || "Kunne ikke slette bruker.");
+			} else {
+				setMsg("Kunne ikke slette bruker. Sjekk admin-rettigheter.");
+			}
+		} finally {
+			setBusyDeleteUserUid(null);
 		}
 	}
 
@@ -539,15 +569,22 @@ export default function AdminPage() {
 													placeholder="0000"
 												/>
 											</td>
-											<td className="py-2 text-right">
-												<button
-													onClick={() => handleChangePin(u.uid)}
-													disabled={busyPinUid === u.uid}
-													className="rounded-xl border px-3 py-2 text-sm"
-												>
-													{busyPinUid === u.uid ? "Lagrer…" : "Endre"}
-												</button>
-											</td>
+								<td className="py-2 text-right space-x-2">
+									<button
+										onClick={() => handleChangePin(u.uid)}
+										disabled={busyPinUid === u.uid || busyDeleteUserUid === u.uid}
+										className="rounded-xl border px-3 py-2 text-sm"
+									>
+										{busyPinUid === u.uid ? "Lagrer…" : "Endre"}
+									</button>
+									<button
+										onClick={() => handleDeleteUser(u)}
+										disabled={busyDeleteUserUid === u.uid || busyPinUid === u.uid}
+										className="rounded-xl border border-red-300 px-3 py-2 text-sm text-red-700"
+									>
+										{busyDeleteUserUid === u.uid ? "Sletter…" : "Slett"}
+									</button>
+								</td>
 										</tr>
 									))}
 								</tbody>

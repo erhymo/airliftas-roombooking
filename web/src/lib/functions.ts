@@ -56,6 +56,16 @@ export async function fnAdminChangePin(targetUid: string, newPin: string) {
 	return res.data;
 }
 
+	export async function fnAdminDeleteUser(targetUid: string) {
+		const f = getFirebaseFunctions();
+		const call = httpsCallable<{ targetUid: string }, { ok: true }>(
+			f,
+			"adminDeleteUser",
+		);
+		const res = await call({ targetUid });
+		return res.data;
+	}
+
 export async function fnApproveUser(requestId: string) {
 	const f = getFirebaseFunctions();
 	const call = httpsCallable<{ requestId: string }, { ok: true }>(
