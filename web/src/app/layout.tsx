@@ -16,6 +16,10 @@ export const metadata: Metadata = {
 	title: "Airlift",
 	description: "Rombooking for Airlift",
 	applicationName: "Airlift",
+	icons: {
+		icon: "/icon.svg",
+		apple: "/icon.svg",
+	},
 };
 
 export default function RootLayout({
