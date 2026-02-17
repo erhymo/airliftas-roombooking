@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Airlift</title>
+  <desc id="desc">Rd tekstlogo for Airlift rombooking-app</desc>
+  <rect width="512" height="512" fill="white" rx="96" ry="96" />
+  <text x="50%" y="55%" text-anchor="middle" fill="#DC2626" font-family="system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif" font-size="160" font-weight="700">
+    Airlift
+  </text>
+</svg>
+
