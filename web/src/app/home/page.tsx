@@ -46,43 +46,62 @@ export default function HomeAppPage() {
 	          <h1 className="text-2xl font-semibold">Velg hva du vil gjøre</h1>
 	        </header>
 
-	        <section className="grid gap-6 md:grid-cols-2 md:items-start">
-	          <button
-	            type="button"
-	            onClick={() => router.push("/bases")}
-	            className="flex flex-col items-start gap-2 rounded-xl border border-zinc-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-	          >
-	            <div className="inline-flex items-center rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700">
-	              Rombooking
-	            </div>
-	            <div className="space-y-1">
-	              <div className="text-base font-semibold text-zinc-900">
-	                Gå til rombooking
-	              </div>
-	              <p className="text-sm text-zinc-700">
-	                Se tilgjengelige rom på basene og opprett / endre bookinger.
-	              </p>
-	            </div>
-	          </button>
+		<section className="grid gap-6 md:grid-cols-2 md:items-start">
+		  <button
+		    type="button"
+		    onClick={() => router.push("/bases")}
+		    className="flex flex-col items-start gap-2 rounded-xl border border-zinc-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+		  >
+		    <div className="inline-flex items-center rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700">
+		      Rombooking
+		    </div>
+		    <div className="space-y-1">
+		      <div className="text-base font-semibold text-zinc-900">
+		        Gå til rombooking
+		      </div>
+		      <p className="text-sm text-zinc-700">
+		        Se tilgjengelige rom på basene og opprett / endre bookinger.
+		      </p>
+		    </div>
+		  </button>
 
-	          <button
-	            type="button"
-	            onClick={() => router.push("/schedule")}
-	            className="flex flex-col items-start gap-2 rounded-xl border border-zinc-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-	          >
-	            <div className="inline-flex items-center rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700">
-	              Din schedule
-	            </div>
-	            <div className="space-y-1">
-	              <div className="text-base font-semibold text-zinc-900">
-	                Se din schedule
-	              </div>
-	              <p className="text-sm text-zinc-700">
-	                Her kommer en enkel oversikt over din personlige schedule.
-	              </p>
-	            </div>
-	          </button>
-	        </section>
+		  <button
+		    type="button"
+		    onClick={() => router.push("/schedule")}
+		    className="flex flex-col items-start gap-2 rounded-xl border border-zinc-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+		  >
+		    <div className="inline-flex items-center rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700">
+		      Din schedule
+		    </div>
+		    <div className="space-y-1">
+		      <div className="text-base font-semibold text-zinc-900">
+		        Se din schedule
+		      </div>
+		      <p className="text-sm text-zinc-700">
+		        Her kommer en enkel oversikt over din personlige schedule.
+		      </p>
+		    </div>
+		  </button>
+
+		  <button
+		    type="button"
+		    onClick={() => router.push("/certificates")}
+		    className="flex flex-col items-start gap-2 rounded-xl border border-zinc-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+		  >
+		    <div className="inline-flex items-center rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700">
+		      Sertifikater og utsjekker
+		    </div>
+		    <div className="space-y-1">
+		      <div className="text-base font-semibold text-zinc-900">
+		        Oversikt over dine sertifikater
+		      </div>
+		      <p className="text-sm text-zinc-700">
+		        Her kommer en samlet oversikt over sertifikater og utsjekker for
+		        piloter og lastemenn.
+		      </p>
+		    </div>
+		  </button>
+		</section>
 	      </div>
 	    </main>
 	  );
