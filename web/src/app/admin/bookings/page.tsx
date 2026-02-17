@@ -377,10 +377,10 @@ export default function AdminBookingsPage() {
 		);
 	}
 
-			return (
+		return (
 			<main className="min-h-screen p-6">
-				<div className="max-w-5xl mx-auto space-y-6">
-					<header className="flex items-center justify-between gap-4">
+				<div className="mx-auto max-w-5xl space-y-6">
+					<header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 						<div>
 							<h1 className="text-2xl font-semibold">Administrer bookinger</h1>
 							<p className="text-sm text-zinc-800">
@@ -388,21 +388,21 @@ export default function AdminBookingsPage() {
 							</p>
 						</div>
 
-					<div className="flex gap-2">
-						<button
-							onClick={() => router.push("/admin")}
-							className="rounded-xl border px-4 py-2"
-						>
-							Til adminpanel
-						</button>
-						<button
-							onClick={handleLogout}
-							className="rounded-xl border px-4 py-2"
-						>
-							Logg ut
-						</button>
-					</div>
-				</header>
+						<div className="flex flex-wrap gap-2 sm:justify-end">
+							<button
+								onClick={() => router.push("/admin")}
+								className="rounded-xl border px-4 py-2"
+							>
+								Til adminpanel
+							</button>
+							<button
+								onClick={handleLogout}
+								className="rounded-xl border px-4 py-2"
+							>
+								Logg ut
+							</button>
+						</div>
+					</header>
 
 				{msg && <div className="rounded-xl border p-3 text-sm">{msg}</div>}
 
