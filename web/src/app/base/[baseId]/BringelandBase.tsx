@@ -455,7 +455,7 @@ export default function BringelandBase() {
 
 					<section className="rounded-2xl border p-4 space-y-3">
 							<div className="flex items-center justify-between gap-4">
-								<div className="font-semibold">Kalender (2 uker)</div>
+								<div className="font-semibold">Kalender</div>
 								<div className="text-[11px] text-zinc-700 text-right">
 									<div>
 										Starter på mandag denne uken og viser 14 dager frem.
@@ -840,13 +840,12 @@ export default function BringelandBase() {
 													const isToday =
 														day.toDateString() === today.toDateString();
 													return (
-														<button
-															key={dayIndex}
-															type="button"
-															onClick={() => {
-																setLongRoom(null);
-																openBooking(longRoom, day);
-															}}
+													<button
+														key={dayIndex}
+														type="button"
+														onClick={() => {
+															openBooking(longRoom, day);
+														}}
 									className={`aspect-square rounded text-[11px] flex flex-col items-center justify-center ${
 										occupied
 											? "bg-red-100 text-red-800"
