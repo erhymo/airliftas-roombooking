@@ -9,7 +9,7 @@ export type AdminUserWithPin = {
 	phone: string;
 	role: "user" | "admin" | (string & {});
 	status: string;
-	pin: string | null;
+		hasPin: boolean;
 };
 
 export async function fnCreateUserRequest(

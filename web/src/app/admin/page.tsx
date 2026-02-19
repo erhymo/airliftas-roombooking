@@ -20,6 +20,7 @@ import {
 		doc,
 	} from "firebase/firestore";
 
+import AppShell from "@/components/AppShell";
 import { firebaseAuth, firebaseDb } from "@/lib/firebaseClient";
 import { markSessionStart } from "@/lib/session";
 import {
@@ -231,17 +232,17 @@ export default function AdminPage() {
 		}
 	}
 
-	// --------------- load users + decrypted pins via function ---------------
-		async function loadUsersWithPins() {
+		// --------------- load users + PIN-status via function ---------------
+			async function loadUsersWithPins() {
 		setRefreshingUsers(true);
 		setMsg(null);
 			try {
 				const res = await fnAdminListUsersWithPins();
 				setUsers(res.users);
 			} catch {
-			setMsg(
-				"Kunne ikke hente brukere/PIN. Sjekk at Functions er deployet og at du er admin.",
-			);
+				setMsg(
+					"Kunne ikke hente brukere/PIN-status. Sjekk at Functions er deployet og at du er admin.",
+				);
 		} finally {
 			setRefreshingUsers(false);
 		}
@@ -361,18 +362,18 @@ export default function AdminPage() {
 			router.push("/admin");
 	}
 
-			// --------------- UI ---------------
-			if (loading) {
-			return (
-				<main className="min-h-screen p-6">
-					<div className="max-w-5xl mx-auto">Laster…</div>
-				</main>
-			);
-		}
-	
-				if (!authUid) {
-				return (
-					<main className="min-h-screen p-6 text-zinc-900">
+				// --------------- UI ---------------
+					if (loading) {
+					return (
+						<main className="min-h-screen bg-zinc-50 p-6 text-zinc-900">
+							<div className="max-w-5xl mx-auto">Laster…</div>
+						</main>
+					);
+				}
+			
+					if (!authUid) {
+					return (
+						<main className="min-h-screen bg-zinc-50 p-6 text-zinc-900">
 						<div className="max-w-md mx-auto space-y-4">
 							<h1 className="text-2xl font-semibold">Admin</h1>
 							<p className="text-sm leading-relaxed">
@@ -420,9 +421,9 @@ export default function AdminPage() {
 			);
 		}
 	
-			if (!isAdmin) {
-		return (
-			<main className="min-h-screen p-6 text-zinc-900">
+					if (!isAdmin) {
+				return (
+					<main className="min-h-screen bg-zinc-50 p-6 text-zinc-900">
 				<div className="max-w-2xl mx-auto space-y-3">
 					<h1 className="text-2xl font-semibold">Admin</h1>
 					<p>Du har ikke admin-tilgang.</p>
@@ -445,44 +446,41 @@ export default function AdminPage() {
 		);
 	}
 
-		return (
-			<main className="min-h-screen p-6">
-				<div className="mx-auto max-w-6xl space-y-6">
-					<header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-						<div>
-							<h1 className="text-2xl font-semibold">Adminpanel</h1>
-							<p className="text-sm leading-relaxed">
-								Godkjenn brukere, se/endre pinkoder
-							</p>
-						</div>
-
-						<div className="flex flex-wrap gap-2 sm:justify-end">
+			return (
+				<AppShell
+					title="Adminpanel"
+					subtitle="Godkjenn brukere og administrer pinkoder (uten å se selve PIN-kodene)"
+					rightSlot={
+						<div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end">
 							<button
-								onClick={() => router.push("/admin/bookings")}
-								className="rounded-xl border px-4 py-2"
+									onClick={() => router.push("/admin/bookings")}
+									className="rounded-xl border px-4 py-2 text-sm font-medium bg-white/0 text-white hover:bg-white/10"
 							>
 								Administrer bookinger
 							</button>
 							<button
-								onClick={() => router.push("/")}
-								className="rounded-xl border px-4 py-2"
+									onClick={() => router.push("/")}
+									className="rounded-xl border px-4 py-2 text-sm font-medium bg-white/0 text-white hover:bg-white/10"
 							>
 								Forside
 							</button>
 							<button
-								onClick={handleLogout}
-								className="rounded-xl border px-4 py-2"
+									onClick={handleLogout}
+									className="rounded-xl border border-white/60 px-4 py-2 text-sm font-medium bg-white/0 text-white hover:bg-white/10"
 							>
 								Logg ut
 							</button>
 						</div>
-					</header>
+					}
+				>
+					<div className="space-y-6">
+						{msg && (
+							<div className="rounded-xl border bg-white p-3 text-sm">{msg}</div>
+						)}
 
-				{msg && <div className="rounded-xl border p-3 text-sm">{msg}</div>}
-
-				{/* Pending requests */}
-						<section className="rounded-2xl border p-4 space-y-3">
-							<div className="flex items-center justify-between gap-3">
+						{/* Pending requests */}
+						<section className="space-y-3 rounded-2xl border bg-white p-4">
+							<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 								<h2 className="text-lg font-semibold">Ventende forespørsler</h2>
 						<button
 							onClick={loadPending}
@@ -504,7 +502,7 @@ export default function AdminPage() {
 									<tr>
 										<th className="py-2">Navn</th>
 										<th className="py-2">Telefon</th>
-										<th className="py-2">Opprettet</th>
+											<th className="py-2 hidden sm:table-cell">Opprettet</th>
 										<th className="py-2"></th>
 									</tr>
 								</thead>
@@ -513,8 +511,8 @@ export default function AdminPage() {
 										<tr key={r.id} className="border-t">
 											<td className="py-2">{r.name}</td>
 											<td className="py-2">{r.phone}</td>
-											<td className="py-2">{fmtDate(r.createdAt)}</td>
-								<td className="py-2 text-right space-x-2">
+											<td className="py-2 hidden sm:table-cell">{fmtDate(r.createdAt)}</td>
+										<td className="py-2 text-right">
 									<button
 										onClick={() => handleApprove(r.id)}
 										disabled={busyApproveId === r.id || busyDeleteId === r.id}
@@ -541,8 +539,8 @@ export default function AdminPage() {
 				</section>
 
 				{/* Users + pins */}
-						<section className="rounded-2xl border p-4 space-y-3">
-					<div className="flex items-center justify-between gap-3">
+						<section className="space-y-3 rounded-2xl border bg-white p-4">
+					<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 						<h2 className="text-lg font-semibold">Brukere og pinkoder</h2>
 						<button
 							onClick={loadUsersWithPins}
@@ -560,11 +558,11 @@ export default function AdminPage() {
 									<table className="w-full text-sm">
 										<thead className="text-left text-zinc-800">
 									<tr>
-										<th className="py-2">Navn</th>
-										<th className="py-2">Telefon</th>
-										<th className="py-2">Rolle</th>
-										<th className="py-2">Status</th>
-										<th className="py-2">PIN</th>
+											<th className="py-2">Navn</th>
+											<th className="py-2">Telefon</th>
+											<th className="py-2 hidden md:table-cell">Rolle</th>
+											<th className="py-2 hidden md:table-cell">Status</th>
+										<th className="py-2">PIN-status</th>
 										<th className="py-2">Ny PIN</th>
 										<th className="py-2"></th>
 									</tr>
@@ -574,9 +572,11 @@ export default function AdminPage() {
 										<tr key={u.uid} className="border-t align-top">
 											<td className="py-2">{u.name}</td>
 											<td className="py-2">{u.phone}</td>
-											<td className="py-2">{u.role}</td>
-											<td className="py-2">{u.status}</td>
-											<td className="py-2 font-mono">{u.pin ?? "—"}</td>
+											<td className="py-2 hidden md:table-cell">{u.role}</td>
+										<td className="py-2 hidden md:table-cell">{u.status}</td>
+										<td className="py-2 font-mono">
+											{u.hasPin ? "Har PIN" : "Mangler PIN"}
+										</td>
 											<td className="py-2">
 												<input
 													inputMode="numeric"
@@ -619,9 +619,9 @@ export default function AdminPage() {
 							</div>
 						</div>
 					)}
-				</section>
-			</div>
-		</main>
-	);
+					</section>
+				</div>
+			</AppShell>
+		);
 }
 

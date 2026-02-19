@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import AppShell from "@/components/AppShell";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import {
 	collection,
@@ -327,17 +328,17 @@ export default function AdminBookingsPage() {
 		}
 
 	// --------------- UI ---------------
-	if (loading) {
-		return (
-			<main className="min-h-screen p-6">
+		if (loading) {
+			return (
+				<main className="min-h-screen bg-zinc-50 p-6 text-zinc-900">
 				<div className="max-w-5xl mx-auto">Laster…</div>
 			</main>
 		);
 	}
 
-	if (!authUid) {
-		return (
-			<main className="min-h-screen p-6">
+		if (!authUid) {
+			return (
+				<main className="min-h-screen bg-zinc-50 p-6 text-zinc-900">
 				<div className="max-w-2xl mx-auto space-y-3">
 					<h1 className="text-2xl font-semibold">Admin – bookinger</h1>
 					<p>Du må være innlogget for å se booking-admin.</p>
@@ -352,9 +353,9 @@ export default function AdminBookingsPage() {
 		);
 	}
 
-	if (!isAdmin) {
-		return (
-			<main className="min-h-screen p-6">
+		if (!isAdmin) {
+			return (
+				<main className="min-h-screen bg-zinc-50 p-6 text-zinc-900">
 				<div className="max-w-2xl mx-auto space-y-3">
 					<h1 className="text-2xl font-semibold">Admin – bookinger</h1>
 					<p>Du har ikke admin-tilgang.</p>
@@ -377,36 +378,26 @@ export default function AdminBookingsPage() {
 		);
 	}
 
-		return (
-			<main className="min-h-screen p-6">
-				<div className="mx-auto max-w-5xl space-y-6">
-					<header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-						<div>
-							<h1 className="text-2xl font-semibold">Administrer bookinger</h1>
-							<p className="text-sm text-zinc-800">
-									Alle bookinger for {BASE_LABELS[selectedBase]}-basen (kun admin).
-							</p>
-						</div>
+			return (
+					<AppShell
+							title="Admin - bookinger"
+						subtitle={`Alle bookinger for ${BASE_LABELS[selectedBase]}-basen (kun admin).`}
+						backHref="/admin"
+						rightSlot={
+							<div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end">
+								<button
+									onClick={handleLogout}
+									className="rounded-xl border border-white/60 px-4 py-2 text-sm font-medium bg-white/0 text-white hover:bg-white/10"
+								>
+									Logg ut
+								</button>
+							</div>
+						}
+					>
+						<div className="space-y-6">
+							{msg && <div className="rounded-xl border bg-white p-3 text-sm">{msg}</div>}
 
-						<div className="flex flex-wrap gap-2 sm:justify-end">
-							<button
-								onClick={() => router.push("/admin")}
-								className="rounded-xl border px-4 py-2"
-							>
-								Til adminpanel
-							</button>
-							<button
-								onClick={handleLogout}
-								className="rounded-xl border px-4 py-2"
-							>
-								Logg ut
-							</button>
-						</div>
-					</header>
-
-				{msg && <div className="rounded-xl border p-3 text-sm">{msg}</div>}
-
-						<section className="rounded-2xl border p-4 space-y-4">
+							<section className="rounded-2xl border bg-white p-4 space-y-4">
 							<div className="flex flex-wrap items-center justify-between gap-3">
 								<div>
 									<h2 className="text-lg font-semibold">Kalender (2 uker)</h2>
@@ -524,7 +515,7 @@ export default function AdminBookingsPage() {
 						</section>
 
 						<section className="rounded-2xl border p-4 space-y-3">
-					<div className="flex items-center justify-between gap-3">
+					<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 								<h2 className="text-lg font-semibold">
 									Bookinger – {BASE_LABELS[selectedBase]}
 								</h2>
@@ -548,7 +539,7 @@ export default function AdminBookingsPage() {
 										<th className="py-2">Navn</th>
 										<th className="py-2">Fra</th>
 										<th className="py-2">Til</th>
-										<th className="py-2">Opprettet av</th>
+											<th className="py-2 hidden md:table-cell">Opprettet av</th>
 										<th className="py-2"></th>
 									</tr>
 								</thead>
@@ -559,7 +550,7 @@ export default function AdminBookingsPage() {
 											<td className="py-2">{b.name}</td>
 											<td className="py-2">{fmt(b.from)}</td>
 											<td className="py-2">{fmt(b.to)}</td>
-										<td className="py-2">
+										<td className="py-2 hidden md:table-cell">
 											<div className="text-xs text-zinc-800">
 												<div>{b.createdByName || "—"}</div>
 												<div className="text-zinc-700">{b.createdByUid}</div>
@@ -734,6 +725,6 @@ export default function AdminBookingsPage() {
 					</div>
 				)}
 			</div>
-		</main>
+		</AppShell>
 	);
 }
