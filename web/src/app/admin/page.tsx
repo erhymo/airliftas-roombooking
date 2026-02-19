@@ -24,12 +24,10 @@ import AppShell from "@/components/AppShell";
 import { firebaseAuth, firebaseDb } from "@/lib/firebaseClient";
 import { markSessionStart } from "@/lib/session";
 import {
-		fnApproveUser,
-		fnAdminChangePin,
-			fnAdminListUsersWithPins,
-			type AdminUserWithPin,
-		} from "@/lib/functions";
-import { fnAdminDeleteUser } from "@/lib/functions";
+			fnApproveUser,
+				fnAdminListUsersWithPins,
+				type AdminUserWithPin,
+			} from "@/lib/functions";
 
 		const HARD_CODED_ADMIN_EMAIL = "oyvind.myhre@airlift.no";
 
@@ -54,10 +52,6 @@ import { fnAdminDeleteUser } from "@/lib/functions";
 		phone?: string;
 		createdAt?: Timestamp | null;
 	};
-
-function onlyDigits4(v: string) {
-	return v.replace(/\D/g, "").slice(0, 4);
-}
 
 function fmtDate(d?: Date | null) {
 	if (!d) return "";
@@ -85,17 +79,13 @@ export default function AdminPage() {
 	const [msg, setMsg] = useState<string | null>(null);
 
 		const [pending, setPending] = useState<PendingRequest[]>([]);
-			const [users, setUsers] = useState<AdminUserRow[]>([]);
+				const [users, setUsers] = useState<AdminUserRow[]>([]);
 
-		const [refreshingPending, setRefreshingPending] = useState(false);
-		const [refreshingUsers, setRefreshingUsers] = useState(false);
+			const [refreshingPending, setRefreshingPending] = useState(false);
+			const [refreshingUsers, setRefreshingUsers] = useState(false);
 
-			const [pinEdits, setPinEdits] = useState<Record<string, string>>({}); // uid -> newPin
-			const [busyPinUid, setBusyPinUid] = useState<string | null>(null);
-			const [busyApproveId, setBusyApproveId] = useState<string | null>(null);
-			const [busyDeleteId, setBusyDeleteId] = useState<string | null>(null);
-			const [busyDeleteUserUid, setBusyDeleteUserUid] =
-				useState<string | null>(null);
+				const [busyApproveId, setBusyApproveId] = useState<string | null>(null);
+				const [busyDeleteId, setBusyDeleteId] = useState<string | null>(null);
 		
 			// --------------- auth gate + admin check ---------------
 		// TODO (manuelt steg i Firebase Console/Firestore):
@@ -286,77 +276,6 @@ export default function AdminPage() {
 			}
 		}
 
-	async function handleChangePin(uid: string) {
-		setMsg(null);
-		const newPin = onlyDigits4(pinEdits[uid] || "");
-		if (newPin.length !== 4) {
-			setMsg("PIN må være 4 siffer.");
-			return;
-		}
-
-		setBusyPinUid(uid);
-		try {
-			await fnAdminChangePin(uid, newPin);
-			setMsg("PIN oppdatert.");
-			setPinEdits((prev) => ({ ...prev, [uid]: "" }));
-			await loadUsersWithPins();
-		} catch {
-			// Viktig: ikke lekke info om kollisjon
-			setMsg("Pinkode ikke godkjent – prøv en ny.");
-		} finally {
-			setBusyPinUid(null);
-		}
-	}
-
-	async function handleDeleteUser(user: AdminUserRow) {
-		setMsg(null);
-		const label = user.name || "denne brukeren";
-		if (
-			typeof window !== "undefined" &&
-			!window.confirm(`Er du sikker på at du vil slette ${label}?`)
-		) {
-			return;
-		}
-
-		setBusyDeleteUserUid(user.uid);
-		let deleted = false;
-		try {
-			await fnAdminDeleteUser(user.uid);
-			deleted = true;
-			// Oppdater lokalt UI med en gang slik at raden forsvinner,
-			// selv om en senere refresh fra backend skulle feile.
-			setUsers((prev) => prev.filter((u) => u.uid !== user.uid));
-			setMsg("Bruker slettet.");
-		} catch (error: unknown) {
-			if (error instanceof Error && error.message) {
-				// Firebase Functions-feil har ofte prefix som "INTERNAL: ".
-				const cleaned = error.message.replace(/^.*?:\s*/, "");
-				const upper = cleaned.trim().toUpperCase();
-				if (upper === "INTERNAL") {
-					setMsg(
-						"Kunne ikke slette bruker (teknisk feil). Prøv igjen eller kontakt utvikler.",
-					);
-				} else {
-					setMsg(cleaned || "Kunne ikke slette bruker.");
-				}
-			} else {
-				setMsg("Kunne ikke slette bruker. Sjekk admin-rettigheter.");
-			}
-		} finally {
-			setBusyDeleteUserUid(null);
-		}
-
-		// Prøv å oppdatere lista fra backend, men ikke la en eventuell feil her
-		// overstyre hovedmeldingen om at brukeren ble slettet.
-		if (deleted) {
-			try {
-				await loadUsersWithPins();
-			} catch {
-				// Ignorer feil her; viktigst er at slettingen har gått gjennom.
-			}
-		}
-	}
-
 	async function handleLogout() {
 		await signOut(auth);
 			router.push("/admin");
@@ -458,12 +377,12 @@ export default function AdminPage() {
 							>
 								Administrer bookinger
 							</button>
-							<button
-									onClick={() => router.push("/")}
-									className="rounded-xl border px-4 py-2 text-sm font-medium bg-white/0 text-white hover:bg-white/10"
-							>
-								Forside
-							</button>
+								<button
+										onClick={() => router.push("/home")}
+										className="rounded-xl border px-4 py-2 text-sm font-medium bg-white/0 text-white hover:bg-white/10"
+									>
+										Forside
+									</button>
 							<button
 									onClick={handleLogout}
 									className="rounded-xl border border-white/60 px-4 py-2 text-sm font-medium bg-white/0 text-white hover:bg-white/10"
@@ -538,10 +457,10 @@ export default function AdminPage() {
 					)}
 				</section>
 
-				{/* Users + pins */}
+					{/* Users */}
 						<section className="space-y-3 rounded-2xl border bg-white p-4">
 					<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-						<h2 className="text-lg font-semibold">Brukere og pinkoder</h2>
+						<h2 className="text-lg font-semibold">Brukere</h2>
 						<button
 							onClick={loadUsersWithPins}
 							disabled={refreshingUsers}
@@ -557,56 +476,21 @@ export default function AdminPage() {
 						<div className="overflow-x-auto">
 									<table className="w-full text-sm">
 										<thead className="text-left text-zinc-800">
-									<tr>
-											<th className="py-2">Navn</th>
-											<th className="py-2">Telefon</th>
-											<th className="py-2 hidden md:table-cell">Rolle</th>
-											<th className="py-2 hidden md:table-cell">Status</th>
-										<th className="py-2">PIN-status</th>
-										<th className="py-2">Ny PIN</th>
-										<th className="py-2"></th>
-									</tr>
-								</thead>
+										<tr>
+												<th className="py-2">Navn</th>
+										</tr>
+										</thead>
 								<tbody>
 									{users.map((u) => (
 										<tr key={u.uid} className="border-t align-top">
-											<td className="py-2">{u.name}</td>
-											<td className="py-2">{u.phone}</td>
-											<td className="py-2 hidden md:table-cell">{u.role}</td>
-										<td className="py-2 hidden md:table-cell">{u.status}</td>
-										<td className="py-2 font-mono">
-											{u.hasPin ? "Har PIN" : "Mangler PIN"}
+										<td className="py-2">
+											<button
+													onClick={() => router.push(`/admin/users/${u.uid}`)}
+													className="w-full text-left text-sm font-medium text-zinc-900 hover:underline"
+											>
+												{u.name || "(uten navn)"}
+											</button>
 										</td>
-											<td className="py-2">
-												<input
-													inputMode="numeric"
-													value={pinEdits[u.uid] ?? ""}
-													onChange={(e) =>
-														setPinEdits((prev) => ({
-															...prev,
-															[u.uid]: onlyDigits4(e.target.value),
-														}))
-													}
-													className="w-28 rounded-xl border p-2 font-mono"
-													placeholder="0000"
-												/>
-											</td>
-								<td className="py-2 text-right space-x-2">
-									<button
-										onClick={() => handleChangePin(u.uid)}
-										disabled={busyPinUid === u.uid || busyDeleteUserUid === u.uid}
-										className="rounded-xl border px-3 py-2 text-sm"
-									>
-										{busyPinUid === u.uid ? "Lagrer…" : "Endre"}
-									</button>
-									<button
-										onClick={() => handleDeleteUser(u)}
-										disabled={busyDeleteUserUid === u.uid || busyPinUid === u.uid}
-										className="rounded-xl border border-red-300 px-3 py-2 text-sm text-red-700"
-									>
-										{busyDeleteUserUid === u.uid ? "Sletter…" : "Slett"}
-									</button>
-								</td>
 										</tr>
 									))}
 								</tbody>
