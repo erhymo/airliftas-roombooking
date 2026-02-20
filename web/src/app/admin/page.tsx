@@ -222,21 +222,44 @@ export default function AdminPage() {
 		}
 	}
 
-		// --------------- load users + PIN-status via function ---------------
-			async function loadUsersWithPins() {
-		setRefreshingUsers(true);
-		setMsg(null);
-			try {
-				const res = await fnAdminListUsersWithPins();
-				setUsers(res.users);
-			} catch {
-				setMsg(
-					"Kunne ikke hente brukere/PIN-status. Sjekk at Functions er deployet og at du er admin.",
-				);
-		} finally {
-			setRefreshingUsers(false);
-		}
-	}
+			// --------------- load users + PIN-status via function ---------------
+				async function loadUsersWithPins() {
+			setRefreshingUsers(true);
+			setMsg(null);
+				try {
+					if (typeof window !== "undefined" && users.length === 0) {
+						try {
+							const cachedRaw = window.localStorage.getItem("admin_users_cache_v1");
+							if (cachedRaw) {
+								const cached = JSON.parse(cachedRaw) as AdminUserRow[];
+								if (Array.isArray(cached) && cached.length > 0) {
+									setUsers(cached);
+								}
+							}
+						} catch {
+							// Ignorer corrupt cache.
+						}
+					}
+					const res = await fnAdminListUsersWithPins();
+					setUsers(res.users);
+					if (typeof window !== "undefined") {
+						try {
+							window.localStorage.setItem(
+					"admin_users_cache_v1",
+						JSON.stringify(res.users),
+					);
+					} catch {
+						// Ignorer hvis localStorage ikke er tilgjengelig/full.
+					}
+					}
+				} catch {
+					setMsg(
+						"Kunne ikke hente brukere/PIN-status. Sjekk at Functions er deployet og at du er admin.",
+					);
+				} finally {
+					setRefreshingUsers(false);
+				}
+			}
 
 	// --------------- actions ---------------
 		async function handleApprove(requestId: string) {
@@ -471,8 +494,10 @@ export default function AdminPage() {
 					</div>
 
 							{users.length === 0 ? (
-								<div className="text-sm text-zinc-800">Ingen brukere funnet.</div>
-					) : (
+								<div className="text-sm text-zinc-800">
+									{refreshingUsers ? "Laster brukere…" : "Ingen brukere funnet."}
+								</div>
+							) : (
 						<div className="overflow-x-auto">
 									<table className="w-full text-sm">
 										<thead className="text-left text-zinc-800">
