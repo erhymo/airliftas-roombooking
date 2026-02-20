@@ -1,14 +1,8 @@
 "use client";
 
-import React, { FormEvent, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-	onAuthStateChanged,
-	signOut,
-	signInWithEmailAndPassword,
-	setPersistence,
-	browserLocalPersistence,
-} from "firebase/auth";
+	import { onAuthStateChanged, signOut } from "firebase/auth";
 import {
 		collection,
 		getDocs,
@@ -21,8 +15,7 @@ import {
 	} from "firebase/firestore";
 
 import AppShell from "@/components/AppShell";
-import { firebaseAuth, firebaseDb } from "@/lib/firebaseClient";
-import { markSessionStart } from "@/lib/session";
+	import { firebaseAuth, firebaseDb } from "@/lib/firebaseClient";
 import {
 			fnApproveUser,
 				fnAdminListUsersWithPins,
@@ -69,12 +62,9 @@ export default function AdminPage() {
 	const auth = useMemo(() => firebaseAuth(), []);
 	const db = useMemo(() => firebaseDb(), []);
 
-	const [loading, setLoading] = useState(true);
-	const [authUid, setAuthUid] = useState<string | null>(null);
-		const [isAdmin, setIsAdmin] = useState(false);
-	const [adminLoginEmail, setAdminLoginEmail] = useState("");
-	const [adminLoginPassword, setAdminLoginPassword] = useState("");
-	const [adminLoginError, setAdminLoginError] = useState<string | null>(null);
+		const [loading, setLoading] = useState(true);
+		const [authUid, setAuthUid] = useState<string | null>(null);
+			const [isAdmin, setIsAdmin] = useState(false);
 
 	const [msg, setMsg] = useState<string | null>(null);
 
@@ -159,31 +149,6 @@ export default function AdminPage() {
 					cancelled = true;
 				};
 			}, [authUid, isAdmin]);
-
-			// --------------- admin-innlogging (e-post/passord via Firebase Auth) ---------------
-			async function handleLocalAdminLogin(e: FormEvent) {
-				e.preventDefault();
-				setAdminLoginError(null);
-
-				const email = adminLoginEmail.trim();
-				const password = adminLoginPassword;
-				if (!email || !password) {
-					setAdminLoginError("Fyll inn både e-post og passord.");
-					return;
-				}
-
-				try {
-					// Sørg for at session overlever refresh / nye faner, lik PIN-innloggingen.
-					await setPersistence(auth, browserLocalPersistence);
-					await signInWithEmailAndPassword(auth, email, password);
-					setAdminLoginPassword("");
-					// Marker fresh session slik at /admin/bookings ikke kaster deg ut pga. isSessionExpired().
-					markSessionStart();
-				} catch (err: unknown) {
-					// Ikke lekke tekniske feilmeldinger til sluttbruker.
-					setAdminLoginError("Feil brukernavn eller passord.");
-				}
-			}
 
 	async function refreshAll() {
 		await Promise.all([loadPending(), loadUsersWithPins()]);
@@ -316,52 +281,19 @@ export default function AdminPage() {
 					if (!authUid) {
 					return (
 						<main className="min-h-screen bg-zinc-50 p-6 text-zinc-900">
-						<div className="max-w-md mx-auto space-y-4">
-							<h1 className="text-2xl font-semibold">Admin</h1>
-							<p className="text-sm leading-relaxed">
-								Logg inn som admin med brukernavn og passord.
-							</p>
-
-						{adminLoginError && (
-							<div className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800">
-								{adminLoginError}
+							<div className="max-w-2xl mx-auto space-y-3">
+								<h1 className="text-2xl font-semibold">Admin</h1>
+								<p>Du må være innlogget med PIN for å bruke adminpanelet.</p>
+								<button
+									onClick={() => router.push("/")}
+									className="rounded-xl border px-4 py-2"
+								>
+									Til forsiden
+								</button>
 							</div>
-						)}
-
-						<form className="space-y-3" onSubmit={handleLocalAdminLogin}>
-							<div className="space-y-1">
-								<label className="text-sm font-medium">Brukernavn (e-post)</label>
-								<input
-									type="email"
-									value={adminLoginEmail}
-									onChange={(e) => setAdminLoginEmail(e.target.value)}
-									className="w-full rounded-xl border px-3 py-2 text-sm"
-								/>
-							</div>
-							<div className="space-y-1">
-								<label className="text-sm font-medium">Passord</label>
-								<input
-									type="password"
-									value={adminLoginPassword}
-									onChange={(e) => setAdminLoginPassword(e.target.value)}
-									className="w-full rounded-xl border px-3 py-2 text-sm"
-								/>
-							</div>
-							<button
-								type="submit"
-								className="w-full rounded-xl bg-sky-900 px-4 py-2 text-sm font-medium text-white hover:bg-sky-800"
-							>
-								Logg inn
-							</button>
-						</form>
-
-							<p className="text-xs text-zinc-900">
-							Alternativt kan du logge inn med PIN via forsiden.
-						</p>
-					</div>
-				</main>
-			);
-		}
+						</main>
+					);
+			}
 	
 					if (!isAdmin) {
 				return (

@@ -3,31 +3,56 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 
-import { firebaseAuth } from "@/lib/firebaseClient";
+import { firebaseAuth, firebaseDb } from "@/lib/firebaseClient";
 import { isSessionExpired } from "@/lib/session";
 import { useOnlineStatus } from "@/lib/useOnlineStatus";
+
+	const HARD_CODED_ADMIN_EMAIL = "oyvind.myhre@airlift.no";
 
 export default function BasePage() {
 	const router = useRouter();
 	const params = useParams<{ baseId: string }>();
 	const baseId = params?.baseId ?? "";
 
-	const auth = useMemo(() => firebaseAuth(), []);
+		const auth = useMemo(() => firebaseAuth(), []);
+		const db = useMemo(() => firebaseDb(), []);
 	const [loading, setLoading] = useState(true);
 	const [uid, setUid] = useState<string | null>(null);
 	const isOnline = useOnlineStatus();
+		const [isAdmin, setIsAdmin] = useState(false);
 
-	useEffect(() => {
-		const unsub = onAuthStateChanged(auth, (u) => {
-			setUid(u?.uid ?? null);
-			setLoading(false);
-			if (!u?.uid || isSessionExpired()) {
-				router.replace("/");
-			}
-		});
-		return () => unsub();
-	}, [auth, router]);
+		useEffect(() => {
+			const unsub = onAuthStateChanged(auth, (u) => {
+				(void (async () => {
+					setUid(u?.uid ?? null);
+					if (!u?.uid || isSessionExpired()) {
+						setIsAdmin(false);
+						setLoading(false);
+						router.replace("/");
+						return;
+					}
+
+					setLoading(false);
+
+					if (u.email === HARD_CODED_ADMIN_EMAIL) {
+						setIsAdmin(true);
+						return;
+					}
+
+					try {
+						const snap = await getDoc(doc(db, "users", u.uid));
+						const data = snap.data() as { role?: string; status?: string } | undefined;
+						const ok = data?.status === "active" && data?.role === "admin";
+						setIsAdmin(!!ok);
+					} catch {
+						setIsAdmin(false);
+					}
+				})());
+			});
+			return () => unsub();
+		}, [auth, db, router]);
 
 	const title =
 		baseId === "bergen"
@@ -97,12 +122,14 @@ export default function BasePage() {
 					>
 						Tilbake
 					</button>
-					<button
-						onClick={() => router.push("/admin")}
-						className="flex-1 rounded-xl border py-3 font-medium"
-					>
-						Admin
-					</button>
+						{isAdmin && (
+							<button
+								onClick={() => router.push("/admin")}
+								className="flex-1 rounded-xl border py-3 font-medium"
+							>
+								Admin
+							</button>
+						)}
 				</div>
 			</div>
 		</main>
