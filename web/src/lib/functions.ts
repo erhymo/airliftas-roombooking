@@ -36,6 +36,12 @@ export async function fnLoginWithPin(pin: string) {
 	return res.data;
 }
 
+	export async function fnWarmupLogin() {
+		const f = getFirebaseFunctions();
+		const call = httpsCallable<unknown, { ok: boolean }>(f, "warmupLogin");
+		await call({});
+	}
+
 export async function fnAdminListUsersWithPins() {
 	const f = getFirebaseFunctions();
 	const call = httpsCallable<unknown, { users: AdminUserWithPin[] }>(
