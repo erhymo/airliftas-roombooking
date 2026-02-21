@@ -109,10 +109,10 @@ export default function SignupPage() {
 								>
 									<option value="">Velg rolle</option>
 									<option value="pilot_los">Pilot LOS</option>
-									<option value="pilot_innland">Pilot innland</option>
-									<option value="lastemann">Lastemann</option>
-									<option value="tekniker">Tekniker</option>
-									<option value="admin">Admin</option>
+						<option value="pilot_innland">Pilot innland</option>
+						<option value="lastemann">Lastemann</option>
+						<option value="tekniker">Tekniker</option>
+						<option value="admin">Administrasjon</option>
 								</select>
 							</div>
 						<div className="space-y-1">
