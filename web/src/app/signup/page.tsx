@@ -14,6 +14,7 @@ export default function SignupPage() {
 
 	const [name, setName] = useState("");
 	const [phone, setPhone] = useState("");
+		const [role, setRole] = useState("");
 	const [registerPin, setRegisterPin] = useState("");
 	const [busyCreate, setBusyCreate] = useState(false);
 	const [msg, setMsg] = useState<string | null>(null);
@@ -26,20 +27,27 @@ export default function SignupPage() {
 			const trimmedName = name.trim();
 			const trimmedPhone = phone.trim();
 			const pin = onlyDigits4(registerPin);
+				const crewRole = role.trim();
 
 			if (!trimmedName || !trimmedPhone) {
 				setMsg("Fyll inn navn og telefon.");
 				return;
 			}
 
+				if (!crewRole) {
+					setMsg("Velg hvilken rolle du har.");
+					return;
+				}
+
 			if (pin.length !== 4) {
 				setMsg("PIN må være 4 siffer.");
 				return;
 			}
 
-			await fnCreateUserRequest(trimmedName, trimmedPhone, pin);
+				await fnCreateUserRequest(trimmedName, trimmedPhone, pin, crewRole);
 			setName("");
 			setPhone("");
+				setRole("");
 			setRegisterPin("");
 			setMsg(
 				"Forespørsel sendt til admin. Når du er godkjent kan du logge inn med PIN-en du valgte.",
@@ -92,6 +100,21 @@ export default function SignupPage() {
 								className="w-full rounded-xl border px-3 py-2 text-sm"
 							/>
 						</div>
+							<div className="space-y-1">
+								<label className="text-sm font-medium">Rolle</label>
+								<select
+									value={role}
+									onChange={(e) => setRole(e.target.value)}
+									className="w-full rounded-xl border px-3 py-2 text-sm bg-white"
+								>
+									<option value="">Velg rolle</option>
+									<option value="pilot_los">Pilot LOS</option>
+									<option value="pilot_innland">Pilot innland</option>
+									<option value="lastemann">Lastemann</option>
+									<option value="tekniker">Tekniker</option>
+									<option value="admin">Admin</option>
+								</select>
+							</div>
 						<div className="space-y-1">
 							<label className="text-sm font-medium">PIN (4 siffer)</label>
 							<input
