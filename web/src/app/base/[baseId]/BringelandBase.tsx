@@ -255,21 +255,21 @@ export default function BringelandBase() {
 				return parts[parts.length - 1];
 			}
 
-			function myLastNameOnDate(roomId: RoomId, day: Date): string {
-				if (!uid) return "";
-				const dayStart = new Date(day);
-				dayStart.setHours(0, 0, 0, 0);
-				const dayEnd = addDays(dayStart, 1);
-				const mine = bookings.find(
-					(b) =>
-						b.roomId === roomId &&
-						b.createdByUid === uid &&
-						overlaps(b.from, b.to, dayStart, dayEnd),
-				);
-				if (!mine) return "";
-				const sourceName = mine.createdByName || myName || "";
-				return getLastNameFromFullName(sourceName);
-			}
+				function myLastNameOnDate(roomId: RoomId, day: Date): string {
+					if (!uid) return "";
+					const dayStart = new Date(day);
+					dayStart.setHours(0, 0, 0, 0);
+					const dayEnd = addDays(dayStart, 1);
+					const booking = bookings.find(
+						(b) =>
+							b.roomId === roomId &&
+							overlaps(b.from, b.to, dayStart, dayEnd),
+					);
+					if (!booking) return "";
+					const sourceName =
+						booking.name || booking.createdByName || myName || "Ukjent";
+					return getLastNameFromFullName(sourceName);
+				}
 
 		function openBooking(roomId: RoomId, day?: Date) {
 			setMsg(null);
