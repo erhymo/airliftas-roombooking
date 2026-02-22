@@ -82,3 +82,19 @@ export async function fnApproveUser(requestId: string) {
 	const res = await call({ requestId });
 	return res.data;
 }
+
+export type SyncMedicalPayload = {
+	storagePath: string;
+	downloadUrl: string;
+	uploadedAt: string;
+};
+
+export async function fnSyncMedicalToOpscom(payload: SyncMedicalPayload) {
+	const f = getFirebaseFunctions();
+	const call = httpsCallable<SyncMedicalPayload, { ok: boolean }>(
+		f,
+		"syncMedicalToOpscom",
+	);
+	const res = await call(payload);
+	return res.data;
+}

@@ -2,6 +2,7 @@ import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
 import { getFunctions, type Functions } from "firebase/functions";
 import { getFirestore, type Firestore, enableIndexedDbPersistence } from "firebase/firestore";
+import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 // Les konfig fra Next.js sine public env-variabler (defineres i web/.env.local).
 // Merk: disse verdiene blir bundet ved build-tid i Next.js.
@@ -78,5 +79,18 @@ export function getFirebaseFunctions(): Functions {
 // Alias med samme navn som i noen eksempelsnutter
 export function firebaseFunctions(): Functions {
 	return getFirebaseFunctions();
+}
+
+let _storage: FirebaseStorage | null = null;
+
+export function getFirebaseStorage(): FirebaseStorage {
+	if (_storage) return _storage;
+	_storage = getStorage(getFirebaseApp());
+	return _storage;
+}
+
+// Enkel alias for steder der vi vil ha en funksjon kalt firebaseStorage()
+export function firebaseStorage(): FirebaseStorage {
+	return getFirebaseStorage();
 }
 
