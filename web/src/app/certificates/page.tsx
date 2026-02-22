@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import AppShell from "@/components/AppShell";
@@ -251,6 +252,10 @@ export default function CertificatesPage() {
 						du sendte. Rekkefølge og innhold kan justeres når vi legger inn den
 						fulle listen fra LOS-systemet.
 					</p>
+					<p className="text-xs text-zinc-600">
+						Du kan trykke på raden for Medical for å komme til en egen side for
+						å laste opp medical-dokumentasjon.
+					</p>
 				</section>
 
 				<section className="space-y-3 rounded-2xl border bg-white p-4">
@@ -264,14 +269,14 @@ export default function CertificatesPage() {
 						</p>
 					</div>
 
-					<div className="overflow-x-auto">
-						<table className="w-full text-sm">
+					<div>
+						<table className="w-full table-fixed text-sm">
 							<thead className="border-b text-left text-zinc-800">
 								<tr>
-									<th className="py-2 pr-4 align-bottom text-xs font-semibold text-zinc-700">
+									<th className="py-2 pr-2 align-bottom text-xs font-semibold text-zinc-700">
 										Tittel godkjenning
 									</th>
-									<th className="py-2 pr-4 align-bottom text-xs font-semibold text-zinc-700">
+									<th className="py-2 pr-2 align-bottom text-xs font-semibold text-zinc-700">
 										Godkjenningskategori
 									</th>
 									<th className="py-2 align-bottom text-xs font-semibold text-zinc-700">
@@ -282,16 +287,42 @@ export default function CertificatesPage() {
 							<tbody>
 								{EXAMPLE_CERTIFICATES.map((c) => (
 									<tr key={`${c.title}-${c.category}`} className="border-b last:border-0">
-										<td className="py-2 pr-4 align-top">
-											<div className="text-sm font-medium text-zinc-900">
-												{c.title}
-											</div>
-											{c.description && (
-												<p className="text-xs text-zinc-600">{c.description}</p>
+									<td className="py-2 pr-2 align-top">
+										{c.category === "Medical" ? (
+											<button
+												type="button"
+												onClick={() => router.push("/certificates/medical")}
+												className="text-left"
+											>
+												<div className="text-sm font-semibold text-sky-700 underline underline-offset-2">
+													{c.title}
+												</div>
+												{c.description && (
+													<p className="text-xs text-zinc-600">{c.description}</p>
+												)}
+											</button>
+										) : (
+											<>
+												<div className="text-sm font-medium text-zinc-900">
+													{c.title}
+												</div>
+												{c.description && (
+													<p className="text-xs text-zinc-600">{c.description}</p>
+												)}
+											</>
+										)}
+									</td>
+										<td className="py-2 pr-2 align-top text-xs text-zinc-800">
+											{c.category === "Medical" ? (
+												<Link
+													href="/certificates/medical"
+													className="text-sky-700 underline underline-offset-2"
+												>
+													{c.category}
+												</Link>
+											) : (
+												c.category
 											)}
-										</td>
-										<td className="py-2 pr-4 align-top text-xs text-zinc-800">
-											{c.category}
 										</td>
 										<td className="py-2 align-top text-xs text-zinc-800">
 											{c.followUp}
